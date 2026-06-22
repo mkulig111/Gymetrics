@@ -64,3 +64,14 @@ export async function deleteProgressPhoto(id: string) {
   await prisma.progressPhoto.delete({ where: { id } });
   revalidatePath("/progress");
 }
+
+export async function getGripStrengthEntries() {
+  return prisma.gripStrengthEntry.findMany({ orderBy: { date: "asc" } });
+}
+
+export async function addGripStrengthEntry(kg: number, date?: Date) {
+  await prisma.gripStrengthEntry.create({
+    data: { kg, date: date ?? new Date() },
+  });
+  revalidatePath("/progress");
+}
