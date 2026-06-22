@@ -1,5 +1,7 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 
 export async function getHistory() {
@@ -24,4 +26,11 @@ export async function getSessionDetail(sessionId: string) {
       },
     },
   });
+}
+
+export async function deleteWorkoutSession(sessionId: string) {
+  await prisma.workoutSession.delete({ where: { id: sessionId } });
+  revalidatePath("/history");
+  revalidatePath("/progress");
+  redirect("/history");
 }
