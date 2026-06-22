@@ -11,7 +11,7 @@ export default async function TrainPage() {
     <div className="space-y-6">
       <form action={startEmptyWorkout}>
         <Button variant="primary" type="submit" className="w-full py-4 text-base">
-          Start Empty Workout
+          ⚡ Start Empty Workout
         </Button>
       </form>
 

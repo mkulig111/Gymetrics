@@ -6,9 +6,11 @@ import { deleteWorkoutSession } from "@/lib/actions/history";
 export default function DeleteWorkoutButton({
   sessionId,
   className,
+  children,
 }: {
   sessionId: string;
   className?: string;
+  children?: React.ReactNode;
 }) {
   const [isPending, startTransition] = useTransition();
 
@@ -21,7 +23,7 @@ export default function DeleteWorkoutButton({
 
   return (
     <button onClick={onClick} disabled={isPending} className={className}>
-      {isPending ? "Deleting…" : "Delete"}
+      {isPending ? "Deleting…" : children ?? "🗑️ Delete"}
     </button>
   );
 }
