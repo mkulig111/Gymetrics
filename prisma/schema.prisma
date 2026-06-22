@@ -109,3 +109,9 @@ model ProgressPhoto {
   date      DateTime @default(now())
   imageData String
 }
+
+model GripStrengthEntry {
+  id   String   @id @default(cuid())
+  date DateTime @default(now())
+  kg   Float
+}
