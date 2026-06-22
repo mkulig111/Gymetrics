@@ -7,6 +7,8 @@ export const metadata: Metadata = {
   description: "Track your routines, workouts, and progress.",
 };
 
+export const dynamic = "force-dynamic";
+
 export default function RootLayout({
   children,
 }: Readonly<{
