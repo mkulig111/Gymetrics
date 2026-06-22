@@ -67,9 +67,16 @@ export async function getPreviousPerformance(exerciseId: string, excludeSessionI
   return prevWe?.sets ?? [];
 }
 
+function revalidateSessionPaths(sessionId: string) {
+  revalidatePath(`/workout/${sessionId}`);
+  revalidatePath(`/history/${sessionId}`);
+  revalidatePath("/history");
+  revalidatePath("/progress");
+}
+
 export async function toggleSetComplete(setId: string, completed: boolean, sessionId: string) {
   await prisma.workoutSet.update({ where: { id: setId }, data: { completed } });
-  revalidatePath(`/workout/${sessionId}`);
+  revalidateSessionPaths(sessionId);
 }
 
 export async function updateWorkoutSet(
@@ -78,7 +85,7 @@ export async function updateWorkoutSet(
   sessionId: string,
 ) {
   await prisma.workoutSet.update({ where: { id: setId }, data });
-  revalidatePath(`/workout/${sessionId}`);
+  revalidateSessionPaths(sessionId);
 }
 
 export async function addSetToWorkoutExercise(workoutExerciseId: string, sessionId: string) {
@@ -95,13 +102,13 @@ export async function addSetToWorkoutExercise(workoutExerciseId: string, session
       seconds: lastSet?.seconds,
     },
   });
-  revalidatePath(`/workout/${sessionId}`);
+  revalidateSessionPaths(sessionId);
   return set;
 }
 
 export async function removeWorkoutSet(setId: string, sessionId: string) {
   await prisma.workoutSet.delete({ where: { id: setId } });
-  revalidatePath(`/workout/${sessionId}`);
+  revalidateSessionPaths(sessionId);
 }
 
 export async function addExerciseToWorkout(sessionId: string, exerciseId: string) {
@@ -115,13 +122,13 @@ export async function addExerciseToWorkout(sessionId: string, exerciseId: string
     },
     include: { exercise: true, sets: true },
   });
-  revalidatePath(`/workout/${sessionId}`);
+  revalidateSessionPaths(sessionId);
   return we;
 }
 
 export async function removeWorkoutExercise(workoutExerciseId: string, sessionId: string) {
   await prisma.workoutExercise.delete({ where: { id: workoutExerciseId } });
-  revalidatePath(`/workout/${sessionId}`);
+  revalidateSessionPaths(sessionId);
 }
 
 export async function swapWorkoutExercise(
@@ -133,7 +140,7 @@ export async function swapWorkoutExercise(
     where: { id: workoutExerciseId },
     data: { exerciseId: newExerciseId },
   });
-  revalidatePath(`/workout/${sessionId}`);
+  revalidateSessionPaths(sessionId);
 }
 
 function bestValue(type: ExerciseType, set: { weightKg: number | null; reps: number | null; seconds: number | null }) {

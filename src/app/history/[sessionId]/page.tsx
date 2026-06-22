@@ -1,8 +1,10 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getSessionDetail } from "@/lib/actions/history";
 import { muscleVolume } from "@/lib/muscleVolume";
 import { ExerciseType } from "@/generated/prisma";
 import { formatDuration } from "@/lib/types";
+import DeleteWorkoutButton from "@/components/history/DeleteWorkoutButton";
 
 export default async function SessionDetailPage({
   params,
@@ -20,17 +22,31 @@ export default async function SessionDetailPage({
 
   return (
     <div className="space-y-6 pb-12">
-      <div>
-        <h1 className="text-2xl font-bold">{session.routineName}</h1>
-        <p className="text-sm text-muted">
-          {session.startedAt.toLocaleDateString(undefined, {
-            weekday: "long",
-            month: "short",
-            day: "numeric",
-            year: "numeric",
-          })}{" "}
-          &middot; {formatDuration(duration)}
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold">{session.routineName}</h1>
+          <p className="text-sm text-muted">
+            {session.startedAt.toLocaleDateString(undefined, {
+              weekday: "long",
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+            })}{" "}
+            &middot; {formatDuration(duration)}
+          </p>
+        </div>
+        <div className="flex shrink-0 gap-2">
+          <Link
+            href={`/history/${session.id}/edit`}
+            className="rounded-lg bg-surface-2 px-3 py-2 text-sm font-semibold hover:bg-border"
+          >
+            Edit
+          </Link>
+          <DeleteWorkoutButton
+            sessionId={session.id}
+            className="rounded-lg bg-danger-bg px-3 py-2 text-sm font-semibold text-danger hover:opacity-90"
+          />
+        </div>
       </div>
 
       {volume.length > 0 && (
