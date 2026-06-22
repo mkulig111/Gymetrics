@@ -77,7 +77,11 @@ export default function ReadinessMetricCard({
     <div className="rounded-xl bg-surface p-4">
       <div className="mb-3 flex items-center justify-between">
         <h2 className="text-lg font-bold">{title}</h2>
-        <button onClick={() => setShowForm((v) => !v)} className="text-xl text-accent">
+        <button
+          onClick={() => setShowForm((v) => !v)}
+          aria-label={`Add ${title} entry`}
+          className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-2 text-lg text-accent hover:bg-border"
+        >
           +
         </button>
       </div>

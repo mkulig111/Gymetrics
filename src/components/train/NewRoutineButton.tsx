@@ -17,7 +17,7 @@ export default function NewRoutineButton() {
 
   return (
     <Button variant="secondary" className="w-full" disabled={loading} onClick={handleClick}>
-      + New Routine
+      ➕ New Routine
     </Button>
   );
 }

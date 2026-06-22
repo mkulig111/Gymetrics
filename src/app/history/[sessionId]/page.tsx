@@ -38,14 +38,16 @@ export default async function SessionDetailPage({
         <div className="flex shrink-0 gap-2">
           <Link
             href={`/history/${session.id}/edit`}
-            className="rounded-lg bg-surface-2 px-3 py-2 text-sm font-semibold hover:bg-border"
+            className="rounded-full bg-surface-2 px-3 py-2 text-sm font-semibold hover:bg-border"
           >
-            Edit
+            ✏️ Edit
           </Link>
           <DeleteWorkoutButton
             sessionId={session.id}
-            className="rounded-lg bg-danger-bg px-3 py-2 text-sm font-semibold text-danger hover:opacity-90"
-          />
+            className="rounded-full bg-danger-bg px-3 py-2 text-sm font-semibold text-danger hover:opacity-90"
+          >
+            🗑️ Delete
+          </DeleteWorkoutButton>
         </div>
       </div>
 

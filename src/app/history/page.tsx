@@ -34,14 +34,16 @@ export default async function HistoryPage() {
                   </span>
                 </div>
                 <p className="text-sm text-muted">
-                  {s.exercises.length} exercises &middot; {completedSets} sets &middot; {formatDuration(duration)}
+                  🏋️ {s.exercises.length} exercises &middot; {completedSets} sets &middot; ⏱ {formatDuration(duration)}
                 </p>
               </Link>
               <div className="mt-2 flex justify-end gap-4 text-xs">
                 <Link href={`/history/${s.id}/edit`} className="text-muted hover:text-accent">
-                  Edit
+                  ✏️ Edit
                 </Link>
-                <DeleteWorkoutButton sessionId={s.id} className="text-muted hover:text-danger" />
+                <DeleteWorkoutButton sessionId={s.id} className="text-muted hover:text-danger">
+                  🗑️ Delete
+                </DeleteWorkoutButton>
               </div>
             </div>
           );

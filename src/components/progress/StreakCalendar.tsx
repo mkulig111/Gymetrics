@@ -9,7 +9,7 @@ export default function StreakCalendar({ workoutDates }: { workoutDates: Date[] 
   return (
     <div className="rounded-xl bg-surface p-4">
       <p className="mb-3 text-lg font-bold">
-        <span className="text-accent">{streak}</span> Week Streak
+        <span className="text-accent">{streak}</span> Week Streak 🔥
       </p>
       <div className="grid grid-cols-7 gap-2 text-center">
         {DAY_LABELS.map((d, i) => (
