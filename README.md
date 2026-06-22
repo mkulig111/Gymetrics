@@ -5,7 +5,7 @@ A self-hosted gym workout tracker: build routines, log active workout sessions w
 ## Stack
 
 - Next.js (App Router, Server Actions)
-- Prisma + SQLite
+- Prisma + PostgreSQL
 - Tailwind CSS
 
 ## Getting Started
