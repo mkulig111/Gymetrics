@@ -75,3 +75,25 @@ export async function addGripStrengthEntry(kg: number, date?: Date) {
   });
   revalidatePath("/progress");
 }
+
+export async function getHrvEntries() {
+  return prisma.hrvEntry.findMany({ orderBy: { date: "asc" } });
+}
+
+export async function addHrvEntry(rmssd: number, date?: Date) {
+  await prisma.hrvEntry.create({
+    data: { rmssd, date: date ?? new Date() },
+  });
+  revalidatePath("/progress");
+}
+
+export async function getWellnessEntries() {
+  return prisma.wellnessEntry.findMany({ orderBy: { date: "asc" } });
+}
+
+export async function addWellnessEntry(score: number, date?: Date) {
+  await prisma.wellnessEntry.create({
+    data: { score, date: date ?? new Date() },
+  });
+  revalidatePath("/progress");
+}

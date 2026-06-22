@@ -1,21 +1,27 @@
 import {
   getBodyweightEntries,
   getGripStrengthEntries,
+  getHrvEntries,
   getLifetimeStats,
   getProgressPhotos,
+  getWellnessEntries,
   getWorkoutDates,
 } from "@/lib/actions/progress";
 import StreakCalendar from "@/components/progress/StreakCalendar";
 import BodyweightChart from "@/components/progress/BodyweightChart";
 import GripStrengthChart from "@/components/progress/GripStrengthChart";
+import HrvChart from "@/components/progress/HrvChart";
+import WellnessChart from "@/components/progress/WellnessChart";
 import ProgressPhotos from "@/components/progress/ProgressPhotos";
 
 export default async function ProgressPage() {
-  const [stats, workoutDates, bodyweight, gripStrength, photos] = await Promise.all([
+  const [stats, workoutDates, bodyweight, gripStrength, hrv, wellness, photos] = await Promise.all([
     getLifetimeStats(),
     getWorkoutDates(),
     getBodyweightEntries(),
     getGripStrengthEntries(),
+    getHrvEntries(),
+    getWellnessEntries(),
     getProgressPhotos(),
   ]);
 
@@ -57,6 +63,8 @@ export default async function ProgressPage() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <BodyweightChart entries={bodyweight} />
         <GripStrengthChart entries={gripStrength} />
+        <HrvChart entries={hrv} />
+        <WellnessChart entries={wellness} />
         <ProgressPhotos photos={photos} />
       </div>
     </div>
