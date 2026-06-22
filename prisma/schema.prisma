@@ -115,3 +115,15 @@ model GripStrengthEntry {
   date DateTime @default(now())
   kg   Float
 }
+
+model HrvEntry {
+  id     String   @id @default(cuid())
+  date   DateTime @default(now())
+  rmssd  Float
+}
+
+model WellnessEntry {
+  id    String   @id @default(cuid())
+  date  DateTime @default(now())
+  score Float
+}
