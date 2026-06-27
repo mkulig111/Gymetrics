@@ -301,6 +301,16 @@ async function main() {
     overridesApplied++;
   }
   console.log(`Applied body-part percentage overrides to ${overridesApplied} exercises`);
+
+  // "Other" was a legacy catch-all muscle group from before exercises had proper
+  // body-part assignments. Remove it so every exercise must be defined with real
+  // body parts via the /exercises editor instead of falling back to a vague bucket.
+  const other = await prisma.bodyPart.findUnique({ where: { name: "Other" } });
+  if (other) {
+    const affected = await prisma.exerciseBodyPart.count({ where: { bodyPartId: other.id } });
+    await prisma.bodyPart.delete({ where: { id: other.id } });
+    console.log(`Removed "Other" body part, leaving ${affected} exercise(s) needing proper body parts`);
+  }
 }
 
 main()

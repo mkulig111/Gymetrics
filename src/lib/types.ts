@@ -17,7 +17,6 @@ export const MUSCLE_GROUPS = [
   "Calves",
   "Core",
   "Hips",
-  "Other",
 ] as const;
 
 export function formatSeconds(totalSeconds: number) {
