@@ -32,6 +32,67 @@ export async function getLifetimeStats() {
   return { totalWorkouts, totalHours, totalVolumeKg, totalPRs };
 }
 
+export type MuscleVolumeInterval = "daily" | "weekly" | "monthly";
+
+const INTERVAL_DAYS: Record<MuscleVolumeInterval, number> = {
+  daily: 1,
+  weekly: 7,
+  monthly: 30,
+};
+
+export async function getMuscleVolumeReport(interval: MuscleVolumeInterval) {
+  const rangeEnd = new Date();
+  const rangeStart = new Date(rangeEnd);
+  rangeStart.setDate(rangeStart.getDate() - (INTERVAL_DAYS[interval] - 1));
+  rangeStart.setHours(0, 0, 0, 0);
+
+  const sets = await prisma.workoutSet.findMany({
+    where: {
+      completed: true,
+      workoutExercise: {
+        session: { finishedAt: { not: null }, startedAt: { gte: rangeStart } },
+      },
+    },
+    include: {
+      workoutExercise: {
+        include: { exercise: { include: { bodyParts: { include: { bodyPart: true } } } } },
+      },
+    },
+  });
+
+  let totalVolumeKg = 0;
+  let totalSets = 0;
+  let totalReps = 0;
+  const muscleMap = new Map<string, number>();
+
+  for (const s of sets) {
+    totalSets++;
+    const exercise = s.workoutExercise.exercise;
+    let load = 0;
+    if (exercise.type === ExerciseType.WEIGHT_REPS && s.weightKg && s.reps) {
+      load = s.weightKg * s.reps;
+      totalVolumeKg += load;
+      totalReps += s.reps;
+    } else if (exercise.type === ExerciseType.BODYWEIGHT_REPS && s.reps) {
+      load = s.reps;
+      totalReps += s.reps;
+    } else if (exercise.type === ExerciseType.TIME && s.seconds) {
+      load = s.seconds;
+    }
+    if (load === 0) continue;
+    for (const bp of exercise.bodyParts) {
+      const name = bp.bodyPart.name;
+      muscleMap.set(name, (muscleMap.get(name) ?? 0) + load * (bp.percentage / 100));
+    }
+  }
+
+  const muscleVolume = [...muscleMap.entries()]
+    .map(([muscle, volume]) => ({ muscle, volume }))
+    .sort((a, b) => b.volume - a.volume);
+
+  return { interval, rangeStart, rangeEnd, totalVolumeKg, totalSets, totalReps, muscleVolume };
+}
+
 export async function getWorkoutDates() {
   const sessions = await prisma.workoutSession.findMany({
     where: { finishedAt: { not: null } },

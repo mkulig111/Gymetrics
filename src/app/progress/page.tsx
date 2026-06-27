@@ -3,6 +3,7 @@ import {
   getGripStrengthEntries,
   getHrvEntries,
   getLifetimeStats,
+  getMuscleVolumeReport,
   getProgressPhotos,
   getWellnessEntries,
   getWorkoutDates,
@@ -13,17 +14,20 @@ import GripStrengthChart from "@/components/progress/GripStrengthChart";
 import HrvChart from "@/components/progress/HrvChart";
 import WellnessChart from "@/components/progress/WellnessChart";
 import ProgressPhotos from "@/components/progress/ProgressPhotos";
+import MuscleVolumeReport from "@/components/progress/MuscleVolumeReport";
 
 export default async function ProgressPage() {
-  const [stats, workoutDates, bodyweight, gripStrength, hrv, wellness, photos] = await Promise.all([
-    getLifetimeStats(),
-    getWorkoutDates(),
-    getBodyweightEntries(),
-    getGripStrengthEntries(),
-    getHrvEntries(),
-    getWellnessEntries(),
-    getProgressPhotos(),
-  ]);
+  const [stats, workoutDates, bodyweight, gripStrength, hrv, wellness, photos, muscleVolumeReport] =
+    await Promise.all([
+      getLifetimeStats(),
+      getWorkoutDates(),
+      getBodyweightEntries(),
+      getGripStrengthEntries(),
+      getHrvEntries(),
+      getWellnessEntries(),
+      getProgressPhotos(),
+      getMuscleVolumeReport("weekly"),
+    ]);
 
   return (
     <div className="space-y-4 pb-12">
@@ -59,6 +63,8 @@ export default async function ProgressPage() {
           </div>
         </div>
       </div>
+
+      <MuscleVolumeReport initialReport={muscleVolumeReport} />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <BodyweightChart entries={bodyweight} />
