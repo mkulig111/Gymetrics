@@ -266,6 +266,18 @@ const bodyPartOverrides: { exerciseName: string; bodyParts: { name: string; perc
   ]},
 ];
 
+// Historical 5x5 training log (Squat / Bench Press / Deadlift), imported once and
+// kept idempotent by checking for an existing session on each date before creating it.
+const TRAINING_LOG_ROUTINE_NAME = "Squat / Bench / Deadlift";
+const trainingLog: { date: string; squatKg: number; benchKg: number; deadliftKg: number }[] = [
+  { date: "2024-06-05", squatKg: 65, benchKg: 46.25, deadliftKg: 100 },
+  { date: "2024-06-08", squatKg: 67.5, benchKg: 50, deadliftKg: 102.5 },
+  { date: "2024-06-12", squatKg: 70, benchKg: 47.5, deadliftKg: 105 },
+  { date: "2024-06-18", squatKg: 72.5, benchKg: 50, deadliftKg: 107.5 },
+  { date: "2024-06-21", squatKg: 75, benchKg: 47.5, deadliftKg: 110 },
+  { date: "2024-06-24", squatKg: 77.5, benchKg: 50, deadliftKg: 112.5 },
+];
+
 async function main() {
   const bodyPartNames = [...new Set(exercises.map((e) => e.muscleGroup))];
   for (const name of bodyPartNames) {
@@ -311,6 +323,68 @@ async function main() {
     await prisma.bodyPart.delete({ where: { id: other.id } });
     console.log(`Removed "Other" body part, leaving ${affected} exercise(s) needing proper body parts`);
   }
+
+  let logSessionsCreated = 0;
+  for (const entry of trainingLog) {
+    const startedAt = new Date(`${entry.date}T12:00:00`);
+    const existing = await prisma.workoutSession.findFirst({
+      where: { routineName: TRAINING_LOG_ROUTINE_NAME, startedAt },
+    });
+    if (existing) continue;
+
+    const finishedAt = new Date(startedAt.getTime() + 60 * 60 * 1000);
+    const session = await prisma.workoutSession.create({
+      data: { routineName: TRAINING_LOG_ROUTINE_NAME, startedAt, finishedAt },
+    });
+
+    const lifts = [
+      { exerciseName: "Back Squat", weightKg: entry.squatKg },
+      { exerciseName: "Barbell Bench Press", weightKg: entry.benchKg },
+      { exerciseName: "Deadlift", weightKg: entry.deadliftKg },
+    ];
+
+    for (let order = 0; order < lifts.length; order++) {
+      const lift = lifts[order];
+      const exercise = await prisma.exercise.findFirst({ where: { name: lift.exerciseName } });
+      if (!exercise) continue;
+
+      const priorSets = await prisma.workoutSet.findMany({
+        where: {
+          completed: true,
+          weightKg: { not: null },
+          workoutExercise: {
+            exerciseId: exercise.id,
+            sessionId: { not: session.id },
+            session: { finishedAt: { not: null } },
+          },
+        },
+      });
+      const priorBest = priorSets.reduce<number | null>(
+        (max, s) => (s.weightKg == null ? max : max == null ? s.weightKg : Math.max(max, s.weightKg)),
+        null,
+      );
+      const isPr = priorBest == null || lift.weightKg > priorBest;
+
+      await prisma.workoutExercise.create({
+        data: {
+          sessionId: session.id,
+          exerciseId: exercise.id,
+          order,
+          sets: {
+            create: Array.from({ length: 5 }, (_, i) => ({
+              setIndex: i,
+              weightKg: lift.weightKg,
+              reps: 5,
+              completed: true,
+              isPr,
+            })),
+          },
+        },
+      });
+    }
+    logSessionsCreated++;
+  }
+  console.log(`Created ${logSessionsCreated} historical training-log sessions`);
 }
 
 main()
