@@ -9,7 +9,7 @@ export async function getRoutines() {
     include: {
       exercises: {
         orderBy: { order: "asc" },
-        include: { exercise: true, sets: true },
+        include: { exercise: { include: { bodyParts: { include: { bodyPart: true } } } }, sets: true },
       },
     },
   });
@@ -21,7 +21,7 @@ export async function getRoutine(id: string) {
     include: {
       exercises: {
         orderBy: { order: "asc" },
-        include: { exercise: true, sets: { orderBy: { setIndex: "asc" } } },
+        include: { exercise: { include: { bodyParts: { include: { bodyPart: true } } } }, sets: { orderBy: { setIndex: "asc" } } },
       },
     },
   });
@@ -59,7 +59,7 @@ export async function addExerciseToRoutine(routineId: string, exerciseId: string
       order: count,
       sets: { create: [{ setIndex: 0 }] },
     },
-    include: { exercise: true, sets: true },
+    include: { exercise: { include: { bodyParts: { include: { bodyPart: true } } } }, sets: true },
   });
   revalidatePath(`/train/routines/${routineId}/edit`);
   return re;

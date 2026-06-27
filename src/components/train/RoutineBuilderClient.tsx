@@ -27,7 +27,7 @@ type RoutineSetData = {
 export type RoutineExerciseData = {
   id: string;
   exerciseId: string;
-  exercise: { id: string; name: string; muscleGroup: string; type: ExerciseType };
+  exercise: { id: string; name: string; type: ExerciseType };
   sets: RoutineSetData[];
 };
 

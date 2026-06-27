@@ -34,7 +34,12 @@ type PrevSet = { setIndex: number; weightKg: number | null; reps: number | null;
 export type WorkoutExerciseData = {
   id: string;
   exerciseId: string;
-  exercise: { id: string; name: string; muscleGroup: string; type: ExerciseType };
+  exercise: {
+    id: string;
+    name: string;
+    type: ExerciseType;
+    bodyParts: { percentage: number; bodyPart: { id: string; name: string } }[];
+  };
   sets: SetData[];
   previousSets: PrevSet[];
 };
@@ -66,7 +71,10 @@ export default function WorkoutSessionClient({
     for (const we of exercises) {
       const count = we.sets.filter((s) => s.completed).length;
       if (count === 0) continue;
-      map.set(we.exercise.muscleGroup, (map.get(we.exercise.muscleGroup) ?? 0) + count);
+      for (const bp of we.exercise.bodyParts) {
+        const name = bp.bodyPart.name;
+        map.set(name, (map.get(name) ?? 0) + count * (bp.percentage / 100));
+      }
     }
     return [...map.entries()].map(([muscle, sets]) => ({ muscle, sets })).sort((a, b) => b.sets - a.sets);
   }, [exercises]);

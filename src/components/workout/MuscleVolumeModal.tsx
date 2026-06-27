@@ -26,7 +26,7 @@ export default function MuscleVolumeModal({
             <div key={v.muscle}>
               <div className="mb-1 flex justify-between text-sm">
                 <span>{v.muscle}</span>
-                <span className="font-semibold">{v.sets}</span>
+                <span className="font-semibold">{v.sets % 1 === 0 ? v.sets : v.sets.toFixed(1)}</span>
               </div>
               <div className="h-2 w-full rounded-full bg-surface-2">
                 <div

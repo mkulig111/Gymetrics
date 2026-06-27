@@ -18,15 +18,34 @@ enum ExerciseType {
 }
 
 model Exercise {
-  id          String   @id @default(cuid())
-  name        String
-  muscleGroup String
-  type        ExerciseType @default(WEIGHT_REPS)
-  isCustom    Boolean  @default(false)
-  createdAt   DateTime @default(now())
+  id        String       @id @default(cuid())
+  name      String
+  type      ExerciseType @default(WEIGHT_REPS)
+  isCustom  Boolean      @default(false)
+  createdAt DateTime     @default(now())
 
   routineExercises RoutineExercise[]
   workoutExercises WorkoutExercise[]
+  bodyParts        ExerciseBodyPart[]
+}
+
+model BodyPart {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+
+  exercises ExerciseBodyPart[]
+}
+
+model ExerciseBodyPart {
+  id         String   @id @default(cuid())
+  exerciseId String
+  exercise   Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  bodyPartId String
+  bodyPart   BodyPart @relation(fields: [bodyPartId], references: [id], onDelete: Cascade)
+  percentage Float    @default(100)
+
+  @@unique([exerciseId, bodyPartId])
 }
 
 model Routine {

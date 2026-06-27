@@ -48,7 +48,7 @@ export async function getActiveSession(id: string) {
     include: {
       exercises: {
         orderBy: { order: "asc" },
-        include: { exercise: true, sets: { orderBy: { setIndex: "asc" } } },
+        include: { exercise: { include: { bodyParts: { include: { bodyPart: true } } } }, sets: { orderBy: { setIndex: "asc" } } },
       },
     },
   });
@@ -120,7 +120,7 @@ export async function addExerciseToWorkout(sessionId: string, exerciseId: string
       order: count,
       sets: { create: [{ setIndex: 0 }] },
     },
-    include: { exercise: true, sets: true },
+    include: { exercise: { include: { bodyParts: { include: { bodyPart: true } } } }, sets: true },
   });
   revalidateSessionPaths(sessionId);
   return we;

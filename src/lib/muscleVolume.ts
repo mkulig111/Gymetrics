@@ -7,10 +7,10 @@ export function muscleVolume(
   for (const we of session.exercises) {
     const completedSets = we.sets.filter((s) => s.completed).length;
     if (completedSets === 0) continue;
-    volume.set(
-      we.exercise.muscleGroup,
-      (volume.get(we.exercise.muscleGroup) ?? 0) + completedSets,
-    );
+    for (const bp of we.exercise.bodyParts) {
+      const name = bp.bodyPart.name;
+      volume.set(name, (volume.get(name) ?? 0) + completedSets * (bp.percentage / 100));
+    }
   }
   return [...volume.entries()]
     .map(([muscle, sets]) => ({ muscle, sets }))
