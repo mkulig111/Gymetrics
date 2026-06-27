@@ -10,11 +10,11 @@ function mondayOf(d: Date) {
   return startOfDay(monday);
 }
 
-export function buildStreakGrid(workoutDates: Date[], weeksToShow = 5, anchorDate: Date = new Date()) {
+export function buildStreakGrid(workoutDates: Date[], weeksToShow = 5) {
   const today = startOfDay(new Date());
   const daySet = new Set(workoutDates.map((d) => startOfDay(d).getTime()));
-  const lastMonday = mondayOf(startOfDay(anchorDate));
-  const firstMonday = new Date(lastMonday);
+  const currentMonday = mondayOf(today);
+  const firstMonday = new Date(currentMonday);
   firstMonday.setDate(firstMonday.getDate() - 7 * (weeksToShow - 1));
 
   const weeks: { date: Date; hasWorkout: boolean; isToday: boolean }[][] = [];

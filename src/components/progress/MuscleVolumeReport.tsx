@@ -9,11 +9,10 @@ const INTERVALS: { value: MuscleVolumeInterval; label: string }[] = [
   { value: "daily", label: "Daily" },
   { value: "weekly", label: "Weekly" },
   { value: "monthly", label: "Monthly" },
-  { value: "all", label: "All Time" },
 ];
 
 function formatDate(d: Date) {
-  return new Date(d).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  return new Date(d).toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
 function formatRange(report: Report) {
