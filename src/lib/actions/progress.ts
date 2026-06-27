@@ -32,9 +32,9 @@ export async function getLifetimeStats() {
   return { totalWorkouts, totalHours, totalVolumeKg, totalPRs };
 }
 
-export type MuscleVolumeInterval = "daily" | "weekly" | "monthly";
+export type MuscleVolumeInterval = "daily" | "weekly" | "monthly" | "all";
 
-const INTERVAL_DAYS: Record<MuscleVolumeInterval, number> = {
+const INTERVAL_DAYS: Record<"daily" | "weekly" | "monthly", number> = {
   daily: 1,
   weekly: 7,
   monthly: 30,
@@ -42,9 +42,19 @@ const INTERVAL_DAYS: Record<MuscleVolumeInterval, number> = {
 
 export async function getMuscleVolumeReport(interval: MuscleVolumeInterval) {
   const rangeEnd = new Date();
-  const rangeStart = new Date(rangeEnd);
-  rangeStart.setDate(rangeStart.getDate() - (INTERVAL_DAYS[interval] - 1));
-  rangeStart.setHours(0, 0, 0, 0);
+  let rangeStart: Date;
+  if (interval === "all") {
+    const earliest = await prisma.workoutSession.findFirst({
+      where: { finishedAt: { not: null } },
+      orderBy: { startedAt: "asc" },
+      select: { startedAt: true },
+    });
+    rangeStart = earliest?.startedAt ?? rangeEnd;
+  } else {
+    rangeStart = new Date(rangeEnd);
+    rangeStart.setDate(rangeStart.getDate() - (INTERVAL_DAYS[interval] - 1));
+    rangeStart.setHours(0, 0, 0, 0);
+  }
 
   const sets = await prisma.workoutSet.findMany({
     where: {
