@@ -69,14 +69,21 @@ export default function WorkoutSessionClient({
   const volume = useMemo(() => {
     const map = new Map<string, number>();
     for (const we of exercises) {
-      const count = we.sets.filter((s) => s.completed).length;
-      if (count === 0) continue;
+      const load = we.sets
+        .filter((s) => s.completed)
+        .reduce((sum, s) => {
+          if (we.exercise.type === ExerciseType.WEIGHT_REPS && s.weightKg && s.reps) return sum + s.weightKg * s.reps;
+          if (we.exercise.type === ExerciseType.BODYWEIGHT_REPS && s.reps) return sum + s.reps;
+          if (we.exercise.type === ExerciseType.TIME && s.seconds) return sum + s.seconds;
+          return sum;
+        }, 0);
+      if (load === 0) continue;
       for (const bp of we.exercise.bodyParts) {
         const name = bp.bodyPart.name;
-        map.set(name, (map.get(name) ?? 0) + count * (bp.percentage / 100));
+        map.set(name, (map.get(name) ?? 0) + load * (bp.percentage / 100));
       }
     }
-    return [...map.entries()].map(([muscle, sets]) => ({ muscle, sets })).sort((a, b) => b.sets - a.sets);
+    return [...map.entries()].map(([muscle, volume]) => ({ muscle, volume })).sort((a, b) => b.volume - a.volume);
   }, [exercises]);
 
   function patchSet(weId: string, setId: string, patch: Partial<SetData>) {

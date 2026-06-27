@@ -60,7 +60,7 @@ export default async function SessionDetailPage({
             {volume.map((v) => (
               <div key={v.muscle} className="flex justify-between text-sm">
                 <span>{v.muscle}</span>
-                <span className="font-semibold">{v.sets} sets</span>
+                <span className="font-semibold">{Math.round(v.volume)}</span>
               </div>
             ))}
           </div>
