@@ -153,13 +153,24 @@ const exercises: { name: string; muscleGroup: string; type: ExerciseType }[] = [
 ];
 
 async function main() {
+  const bodyPartNames = [...new Set(exercises.map((e) => e.muscleGroup))];
+  for (const name of bodyPartNames) {
+    await prisma.bodyPart.upsert({ where: { name }, update: {}, create: { name } });
+  }
+
   for (const e of exercises) {
     const existing = await prisma.exercise.findFirst({ where: { name: e.name } });
     if (!existing) {
-      await prisma.exercise.create({ data: e });
+      await prisma.exercise.create({
+        data: {
+          name: e.name,
+          type: e.type,
+          bodyParts: { create: [{ percentage: 100, bodyPart: { connect: { name: e.muscleGroup } } }] },
+        },
+      });
     }
   }
-  console.log(`Seeded ${exercises.length} exercises`);
+  console.log(`Seeded ${exercises.length} exercises across ${bodyPartNames.length} body parts`);
 }
 
 main()

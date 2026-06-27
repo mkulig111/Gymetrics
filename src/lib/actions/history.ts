@@ -10,7 +10,7 @@ export async function getHistory() {
     orderBy: { startedAt: "desc" },
     include: {
       exercises: {
-        include: { exercise: true, sets: true },
+        include: { exercise: { include: { bodyParts: { include: { bodyPart: true } } } }, sets: true },
       },
     },
   });
@@ -22,7 +22,7 @@ export async function getSessionDetail(sessionId: string) {
     include: {
       exercises: {
         orderBy: { order: "asc" },
-        include: { exercise: true, sets: { orderBy: { setIndex: "asc" } } },
+        include: { exercise: { include: { bodyParts: { include: { bodyPart: true } } } }, sets: { orderBy: { setIndex: "asc" } } },
       },
     },
   });

@@ -9,8 +9,8 @@ import { ExerciseType } from "@/generated/prisma";
 export type ExerciseOption = {
   id: string;
   name: string;
-  muscleGroup: string;
   type: ExerciseType;
+  bodyParts: { percentage: number; bodyPart: { id: string; name: string } }[];
 };
 
 export default function ExercisePicker({
@@ -31,7 +31,9 @@ export default function ExercisePicker({
     const q = query.trim().toLowerCase();
     if (!q) return exercises;
     return exercises.filter(
-      (e) => e.name.toLowerCase().includes(q) || e.muscleGroup.toLowerCase().includes(q),
+      (e) =>
+        e.name.toLowerCase().includes(q) ||
+        e.bodyParts.some((bp) => bp.bodyPart.name.toLowerCase().includes(q)),
     );
   }, [exercises, query]);
 
@@ -39,7 +41,7 @@ export default function ExercisePicker({
     if (!query.trim()) return;
     setCreating(true);
     try {
-      const created = await createCustomExercise(query.trim(), "Other", ExerciseType.WEIGHT_REPS);
+      const created = await createCustomExercise(query.trim(), ExerciseType.WEIGHT_REPS);
       onPick(created.id);
     } finally {
       setCreating(false);
@@ -73,7 +75,9 @@ export default function ExercisePicker({
               className="flex w-full flex-col items-start py-3 text-left hover:text-accent"
             >
               <span className="font-medium">{ex.name}</span>
-              <span className="text-xs text-muted">{ex.muscleGroup}</span>
+              <span className="text-xs text-muted">
+                {ex.bodyParts.map((bp) => bp.bodyPart.name).join(", ") || "No body parts"}
+              </span>
             </button>
           </li>
         ))}

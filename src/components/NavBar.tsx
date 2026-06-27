@@ -7,6 +7,7 @@ const TABS = [
   { href: "/train", label: "Train" },
   { href: "/history", label: "History" },
   { href: "/progress", label: "Progress" },
+  { href: "/exercises", label: "Exercises" },
 ];
 
 export default function NavBar() {
