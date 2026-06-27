@@ -270,13 +270,25 @@ const bodyPartOverrides: { exerciseName: string; bodyParts: { name: string; perc
 // kept idempotent by checking for an existing session on each date before creating it.
 const TRAINING_LOG_ROUTINE_NAME = "Squat / Bench / Deadlift";
 const trainingLog: { date: string; squatKg: number; benchKg: number; deadliftKg: number }[] = [
-  { date: "2024-06-05", squatKg: 65, benchKg: 46.25, deadliftKg: 100 },
-  { date: "2024-06-08", squatKg: 67.5, benchKg: 50, deadliftKg: 102.5 },
-  { date: "2024-06-12", squatKg: 70, benchKg: 47.5, deadliftKg: 105 },
-  { date: "2024-06-18", squatKg: 72.5, benchKg: 50, deadliftKg: 107.5 },
-  { date: "2024-06-21", squatKg: 75, benchKg: 47.5, deadliftKg: 110 },
-  { date: "2024-06-24", squatKg: 77.5, benchKg: 50, deadliftKg: 112.5 },
+  { date: "2026-06-05", squatKg: 65, benchKg: 46.25, deadliftKg: 100 },
+  { date: "2026-06-08", squatKg: 67.5, benchKg: 50, deadliftKg: 102.5 },
+  { date: "2026-06-12", squatKg: 70, benchKg: 47.5, deadliftKg: 105 },
+  { date: "2026-06-18", squatKg: 72.5, benchKg: 50, deadliftKg: 107.5 },
+  { date: "2026-06-21", squatKg: 75, benchKg: 47.5, deadliftKg: 110 },
+  { date: "2026-06-24", squatKg: 77.5, benchKg: 50, deadliftKg: 112.5 },
 ];
+
+// The training log was originally imported with the wrong year (2024 instead of
+// 2026). Correct any already-imported sessions in place rather than creating
+// duplicates, so the date fix applies idempotently on every deploy.
+const trainingLogDateCorrections: Record<string, string> = {
+  "2024-06-05": "2026-06-05",
+  "2024-06-08": "2026-06-08",
+  "2024-06-12": "2026-06-12",
+  "2024-06-18": "2026-06-18",
+  "2024-06-21": "2026-06-21",
+  "2024-06-24": "2026-06-24",
+};
 
 async function main() {
   const bodyPartNames = [...new Set(exercises.map((e) => e.muscleGroup))];
@@ -322,6 +334,24 @@ async function main() {
     const affected = await prisma.exerciseBodyPart.count({ where: { bodyPartId: other.id } });
     await prisma.bodyPart.delete({ where: { id: other.id } });
     console.log(`Removed "Other" body part, leaving ${affected} exercise(s) needing proper body parts`);
+  }
+
+  let logDatesCorrected = 0;
+  for (const [oldDate, newDate] of Object.entries(trainingLogDateCorrections)) {
+    const oldStartedAt = new Date(`${oldDate}T12:00:00`);
+    const existing = await prisma.workoutSession.findFirst({
+      where: { routineName: TRAINING_LOG_ROUTINE_NAME, startedAt: oldStartedAt },
+    });
+    if (!existing) continue;
+    const newStartedAt = new Date(`${newDate}T12:00:00`);
+    await prisma.workoutSession.update({
+      where: { id: existing.id },
+      data: { startedAt: newStartedAt, finishedAt: new Date(newStartedAt.getTime() + 60 * 60 * 1000) },
+    });
+    logDatesCorrected++;
+  }
+  if (logDatesCorrected > 0) {
+    console.log(`Corrected ${logDatesCorrected} training log session date(s) from 2024 to 2026`);
   }
 
   let logSessionsCreated = 0;
