@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { addBodyweightEntry } from "@/lib/actions/progress";
+import WeeklyTrendChart from "@/components/progress/WeeklyTrendChart";
+import { buildWeekDays, bucketValuesByDay, weekRangeLabel } from "@/lib/weeklyChart";
 
 type Entry = { id: string; date: Date; weightKg: number };
 
@@ -22,18 +24,12 @@ export default function BodyweightChart({ entries }: { entries: Entry[] }) {
     router.refresh();
   }
 
-  const width = 280;
-  const height = 100;
-  const values = entries.map((e) => e.weightKg);
-  const min = Math.min(...values, latest?.weightKg ?? 0);
-  const max = Math.max(...values, latest?.weightKg ?? 1);
-  const range = max - min || 1;
-
-  const points = entries.map((e, i) => {
-    const x = entries.length > 1 ? (i / (entries.length - 1)) * width : width / 2;
-    const y = height - ((e.weightKg - min) / range) * height;
-    return `${x},${y}`;
-  });
+  const days = buildWeekDays();
+  const values = bucketValuesByDay(entries.map((e) => ({ date: e.date, value: e.weightKg })), days);
+  const present = values.filter((v): v is number => v !== null);
+  const weekAvg = present.length ? present.reduce((sum, v) => sum + v, 0) / present.length : null;
+  const headerValue = weekAvg ?? latest?.weightKg ?? null;
+  const headerLabel = weekAvg !== null ? "Average" : "Latest";
 
   return (
     <div className="rounded-xl bg-surface p-4">
@@ -57,7 +53,7 @@ export default function BodyweightChart({ entries }: { entries: Entry[] }) {
             type="number"
             className="flex-1 rounded-lg border border-border bg-surface-2 px-3 py-2 text-sm outline-none focus:border-accent"
           />
-          <button onClick={handleAdd} className="rounded-lg bg-accent px-4 py-2 text-sm font-bold text-black">
+          <button onClick={handleAdd} className="rounded-full bg-accent px-4 py-2 text-sm font-bold text-black">
             Save
           </button>
         </div>
@@ -67,23 +63,16 @@ export default function BodyweightChart({ entries }: { entries: Entry[] }) {
         <p className="text-sm text-muted">No entries yet. Log your weight to track progress.</p>
       ) : (
         <>
-          <svg viewBox={`0 0 ${width} ${height}`} className="w-full" preserveAspectRatio="none">
-            <polyline
-              points={points.join(" ")}
-              fill="none"
-              stroke="#f5b700"
-              strokeWidth={2}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            {entries.map((e, i) => {
-              const [x, y] = points[i].split(",").map(Number);
-              return <circle key={e.id} cx={x} cy={y} r={3} fill="#f5b700" />;
-            })}
-          </svg>
-          <p className="mt-2 text-2xl font-bold">
-            {latest.weightKg.toFixed(2)} <span className="text-base text-muted">kg</span>
-          </p>
+          <div className="mb-2 flex items-end justify-between">
+            <div>
+              <p className="text-xs text-muted">{headerLabel}</p>
+              <p className="text-2xl font-bold">
+                {headerValue!.toFixed(1)} <span className="text-base text-muted">kg</span>
+              </p>
+            </div>
+            <p className="text-xs text-muted">{weekRangeLabel(days)}</p>
+          </div>
+          <WeeklyTrendChart values={values} days={days} />
         </>
       )}
     </div>
