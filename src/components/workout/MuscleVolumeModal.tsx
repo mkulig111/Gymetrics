@@ -6,10 +6,10 @@ export default function MuscleVolumeModal({
   volume,
   onClose,
 }: {
-  volume: { muscle: string; sets: number }[];
+  volume: { muscle: string; volume: number }[];
   onClose: () => void;
 }) {
-  const max = Math.max(1, ...volume.map((v) => v.sets));
+  const max = Math.max(1, ...volume.map((v) => v.volume));
   return (
     <Modal title="Muscle Volume" onClose={onClose}>
       {volume.length === 0 ? (
@@ -20,18 +20,18 @@ export default function MuscleVolumeModal({
         <div className="space-y-3">
           <div className="flex justify-between text-xs uppercase tracking-wide text-muted">
             <span>Muscle</span>
-            <span>Sets</span>
+            <span>Volume</span>
           </div>
           {volume.map((v) => (
             <div key={v.muscle}>
               <div className="mb-1 flex justify-between text-sm">
                 <span>{v.muscle}</span>
-                <span className="font-semibold">{v.sets % 1 === 0 ? v.sets : v.sets.toFixed(1)}</span>
+                <span className="font-semibold">{Math.round(v.volume)}</span>
               </div>
               <div className="h-2 w-full rounded-full bg-surface-2">
                 <div
                   className="h-2 rounded-full bg-accent"
-                  style={{ width: `${(v.sets / max) * 100}%` }}
+                  style={{ width: `${(v.volume / max) * 100}%` }}
                 />
               </div>
             </div>
