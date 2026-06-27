@@ -152,6 +152,120 @@ const exercises: { name: string; muscleGroup: string; type: ExerciseType }[] = [
   { name: "Doorway Chest Stretch", muscleGroup: "Chest", type: T },
 ];
 
+// Multi-body-part percentage breakdowns sourced from free-weights exercise data.
+// Applied on every seed run (delete + recreate) so updated percentages always take effect.
+const bodyPartOverrides: { exerciseName: string; bodyParts: { name: string; percentage: number }[] }[] = [
+  { exerciseName: "Back Squat", bodyParts: [
+    { name: "Quadriceps", percentage: 40 },
+    { name: "Glutes", percentage: 30 },
+    { name: "Hamstrings", percentage: 15 },
+    { name: "Core", percentage: 7.5 },
+    { name: "Lower Back", percentage: 7.5 },
+  ]},
+  { exerciseName: "Front Squat", bodyParts: [
+    { name: "Quadriceps", percentage: 50 },
+    { name: "Glutes", percentage: 20 },
+    { name: "Core", percentage: 20 },
+    { name: "Back", percentage: 10 },
+  ]},
+  { exerciseName: "Romanian Deadlift", bodyParts: [
+    { name: "Hamstrings", percentage: 40 },
+    { name: "Glutes", percentage: 30 },
+    { name: "Lower Back", percentage: 20 },
+    { name: "Core", percentage: 10 },
+  ]},
+  { exerciseName: "Deadlift", bodyParts: [
+    { name: "Glutes", percentage: 20 },
+    { name: "Hamstrings", percentage: 20 },
+    { name: "Lower Back", percentage: 20 },
+    { name: "Quadriceps", percentage: 15 },
+    { name: "Back", percentage: 7.5 },
+    { name: "Traps", percentage: 7.5 },
+    { name: "Forearms", percentage: 5 },
+    { name: "Core", percentage: 5 },
+  ]},
+  { exerciseName: "Walking Lunge", bodyParts: [
+    { name: "Quadriceps", percentage: 40 },
+    { name: "Glutes", percentage: 35 },
+    { name: "Hamstrings", percentage: 15 },
+    { name: "Core", percentage: 10 },
+  ]},
+  { exerciseName: "Reverse Lunge", bodyParts: [
+    { name: "Quadriceps", percentage: 40 },
+    { name: "Glutes", percentage: 35 },
+    { name: "Hamstrings", percentage: 15 },
+    { name: "Core", percentage: 10 },
+  ]},
+  { exerciseName: "Goblet Squat", bodyParts: [
+    { name: "Quadriceps", percentage: 45 },
+    { name: "Glutes", percentage: 30 },
+    { name: "Core", percentage: 15 },
+    { name: "Hamstrings", percentage: 10 },
+  ]},
+  { exerciseName: "Standing Calf Raise", bodyParts: [
+    { name: "Calves", percentage: 90 },
+  ]},
+  { exerciseName: "Barbell Bench Press", bodyParts: [
+    { name: "Chest", percentage: 50 },
+    { name: "Triceps", percentage: 25 },
+    { name: "Shoulders", percentage: 20 },
+  ]},
+  { exerciseName: "Dumbbell Bench Press", bodyParts: [
+    { name: "Chest", percentage: 55 },
+    { name: "Triceps", percentage: 25 },
+    { name: "Shoulders", percentage: 15 },
+  ]},
+  { exerciseName: "Seated Dumbbell Shoulder Press", bodyParts: [
+    { name: "Shoulders", percentage: 60 },
+    { name: "Triceps", percentage: 25 },
+    { name: "Traps", percentage: 10 },
+    { name: "Core", percentage: 5 },
+  ]},
+  { exerciseName: "Dumbbell Fly", bodyParts: [
+    { name: "Chest", percentage: 70 },
+    { name: "Shoulders", percentage: 20 },
+  ]},
+  { exerciseName: "Barbell Row", bodyParts: [
+    { name: "Back", percentage: 75 },
+    { name: "Biceps", percentage: 15 },
+    { name: "Shoulders", percentage: 5 },
+    { name: "Lower Back", percentage: 5 },
+  ]},
+  { exerciseName: "Single Arm Dumbbell Row", bodyParts: [
+    { name: "Back", percentage: 55 },
+    { name: "Biceps", percentage: 20 },
+    { name: "Shoulders", percentage: 15 },
+    { name: "Core", percentage: 10 },
+  ]},
+  { exerciseName: "Barbell Curl", bodyParts: [
+    { name: "Biceps", percentage: 80 },
+    { name: "Forearms", percentage: 15 },
+  ]},
+  { exerciseName: "Lateral Raise", bodyParts: [
+    { name: "Shoulders", percentage: 70 },
+    { name: "Traps", percentage: 20 },
+  ]},
+  { exerciseName: "Overhead Triceps Extension", bodyParts: [
+    { name: "Triceps", percentage: 85 },
+    { name: "Shoulders", percentage: 10 },
+    { name: "Core", percentage: 5 },
+  ]},
+  { exerciseName: "Farmer's Carry", bodyParts: [
+    { name: "Forearms", percentage: 16.7 },
+    { name: "Core", percentage: 16.7 },
+    { name: "Traps", percentage: 16.7 },
+    { name: "Quadriceps", percentage: 25 },
+    { name: "Shoulders", percentage: 25 },
+  ]},
+  { exerciseName: "Thruster", bodyParts: [
+    { name: "Quadriceps", percentage: 20 },
+    { name: "Glutes", percentage: 20 },
+    { name: "Shoulders", percentage: 30 },
+    { name: "Triceps", percentage: 15 },
+    { name: "Core", percentage: 15 },
+  ]},
+];
+
 async function main() {
   const bodyPartNames = [...new Set(exercises.map((e) => e.muscleGroup))];
   for (const name of bodyPartNames) {
@@ -171,6 +285,22 @@ async function main() {
     }
   }
   console.log(`Seeded ${exercises.length} exercises across ${bodyPartNames.length} body parts`);
+
+  let overridesApplied = 0;
+  for (const override of bodyPartOverrides) {
+    const exercise = await prisma.exercise.findFirst({ where: { name: override.exerciseName } });
+    if (!exercise) continue;
+    await prisma.exerciseBodyPart.deleteMany({ where: { exerciseId: exercise.id } });
+    for (const bp of override.bodyParts) {
+      const bodyPart = await prisma.bodyPart.findUnique({ where: { name: bp.name } });
+      if (!bodyPart) continue;
+      await prisma.exerciseBodyPart.create({
+        data: { exerciseId: exercise.id, bodyPartId: bodyPart.id, percentage: bp.percentage },
+      });
+    }
+    overridesApplied++;
+  }
+  console.log(`Applied body-part percentage overrides to ${overridesApplied} exercises`);
 }
 
 main()
