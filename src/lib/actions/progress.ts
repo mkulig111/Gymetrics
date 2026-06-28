@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { ExerciseType } from "@/generated/prisma";
+import { ExerciseType, SetType } from "@/generated/prisma";
 
 export async function getLifetimeStats() {
   const sessions = await prisma.workoutSession.findMany({
@@ -16,7 +16,11 @@ export async function getLifetimeStats() {
   const totalHours = totalMs / 1000 / 60 / 60;
 
   const sets = await prisma.workoutSet.findMany({
-    where: { completed: true, workoutExercise: { session: { finishedAt: { not: null } } } },
+    where: {
+      completed: true,
+      type: { not: SetType.WARMUP },
+      workoutExercise: { session: { finishedAt: { not: null } } },
+    },
     include: { workoutExercise: { include: { exercise: true } } },
   });
 
@@ -49,6 +53,7 @@ export async function getMuscleVolumeReport(interval: MuscleVolumeInterval) {
   const sets = await prisma.workoutSet.findMany({
     where: {
       completed: true,
+      type: { not: SetType.WARMUP },
       workoutExercise: {
         session: { finishedAt: { not: null }, startedAt: { gte: rangeStart } },
       },
