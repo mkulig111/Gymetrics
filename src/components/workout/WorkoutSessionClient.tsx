@@ -1,13 +1,14 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
-import { ExerciseType } from "@/generated/prisma";
+import { ExerciseType, SetType } from "@/generated/prisma";
 import Button from "@/components/ui/Button";
 import ExercisePicker, { ExerciseOption } from "@/components/ExercisePicker";
 import ElapsedTimer from "@/components/workout/ElapsedTimer";
 import { RestTimerBar, RestTimerPickerModal } from "@/components/workout/RestTimer";
 import MuscleVolumeModal from "@/components/workout/MuscleVolumeModal";
 import PlateCalcModal from "@/components/workout/PlateCalcModal";
+import SetTypeModal, { SET_TYPE_META } from "@/components/workout/SetTypeModal";
 import {
   addExerciseToWorkout,
   addSetToWorkoutExercise,
@@ -17,11 +18,13 @@ import {
   removeWorkoutSet,
   swapWorkoutExercise,
   toggleSetComplete,
+  updateSetType,
   updateWorkoutSet,
 } from "@/lib/actions/workouts";
 type SetData = {
   id: string;
   setIndex: number;
+  type: SetType;
   weightKg: number | null;
   reps: number | null;
   seconds: number | null;
@@ -64,13 +67,14 @@ export default function WorkoutSessionClient({
   const [showCalc, setShowCalc] = useState(false);
   const [showAddExercise, setShowAddExercise] = useState(false);
   const [swapTarget, setSwapTarget] = useState<string | null>(null);
+  const [setTypeTarget, setSetTypeTarget] = useState<{ weId: string; set: SetData } | null>(null);
   const [, startTransition] = useTransition();
 
   const volume = useMemo(() => {
     const map = new Map<string, number>();
     for (const we of exercises) {
       const load = we.sets
-        .filter((s) => s.completed)
+        .filter((s) => s.completed && s.type !== SetType.WARMUP)
         .reduce((sum, s) => {
           if (we.exercise.type === ExerciseType.WEIGHT_REPS && s.weightKg && s.reps) return sum + s.weightKg * s.reps;
           if (we.exercise.type === ExerciseType.BODYWEIGHT_REPS && s.reps) return sum + s.reps;
@@ -113,6 +117,16 @@ export default function WorkoutSessionClient({
     });
   }
 
+  function onPickSetType(type: SetType) {
+    if (!setTypeTarget) return;
+    const { weId, set } = setTypeTarget;
+    setSetTypeTarget(null);
+    patchSet(weId, set.id, { type });
+    startTransition(() => {
+      updateSetType(set.id, type, sessionId);
+    });
+  }
+
   async function onAddSet(we: WorkoutExerciseData) {
     const created = await addSetToWorkoutExercise(we.id, sessionId);
     setExercises((prev) =>
@@ -126,6 +140,7 @@ export default function WorkoutSessionClient({
                 {
                   id: created.id,
                   setIndex: created.setIndex,
+                  type: created.type,
                   weightKg: created.weightKg,
                   reps: created.reps,
                   seconds: created.seconds,
@@ -166,6 +181,7 @@ export default function WorkoutSessionClient({
         sets: created.sets.map((s) => ({
           id: s.id,
           setIndex: s.setIndex,
+          type: s.type,
           weightKg: s.weightKg,
           reps: s.reps,
           seconds: s.seconds,
@@ -257,7 +273,17 @@ export default function WorkoutSessionClient({
                   key={set.id}
                   className="grid grid-cols-[auto_1fr_1fr_1fr_auto] items-center gap-2 border-t border-border py-2"
                 >
-                  <span className="text-muted">{set.setIndex + 1}</span>
+                  <button
+                    onClick={() => setSetTypeTarget({ weId: we.id, set })}
+                    aria-label="Change set type"
+                    className={`flex h-7 w-7 items-center justify-center rounded-md text-sm font-bold ${
+                      SET_TYPE_META[set.type].className
+                        ? `${SET_TYPE_META[set.type].className} text-white`
+                        : "text-muted"
+                    }`}
+                  >
+                    {set.type === SetType.WORK ? set.setIndex + 1 : SET_TYPE_META[set.type].letter}
+                  </button>
                   <span className="text-xs text-muted">
                     {prev
                       ? we.exercise.type === ExerciseType.TIME
@@ -361,6 +387,14 @@ export default function WorkoutSessionClient({
 
       {showVolume && <MuscleVolumeModal volume={volume} onClose={() => setShowVolume(false)} />}
       {showCalc && <PlateCalcModal onClose={() => setShowCalc(false)} />}
+
+      {setTypeTarget && (
+        <SetTypeModal
+          setNumber={setTypeTarget.set.setIndex + 1}
+          onPick={onPickSetType}
+          onClose={() => setSetTypeTarget(null)}
+        />
+      )}
 
       {showAddExercise && (
         <ExercisePicker

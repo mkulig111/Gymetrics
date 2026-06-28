@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { ExerciseType } from "@/generated/prisma";
+import { ExerciseType, SetType } from "@/generated/prisma";
 
 export async function startWorkoutFromRoutine(routineId: string) {
   const routine = await prisma.routine.findUnique({
@@ -88,6 +88,11 @@ export async function updateWorkoutSet(
   revalidateSessionPaths(sessionId);
 }
 
+export async function updateSetType(setId: string, type: SetType, sessionId: string) {
+  await prisma.workoutSet.update({ where: { id: setId }, data: { type } });
+  revalidateSessionPaths(sessionId);
+}
+
 export async function addSetToWorkoutExercise(workoutExerciseId: string, sessionId: string) {
   const lastSet = await prisma.workoutSet.findFirst({
     where: { workoutExerciseId },
@@ -157,12 +162,13 @@ export async function finishWorkout(sessionId: string) {
   if (!session) throw new Error("Session not found");
 
   for (const we of session.exercises) {
-    const completedSets = we.sets.filter((s) => s.completed);
+    const completedSets = we.sets.filter((s) => s.completed && s.type !== SetType.WARMUP);
     if (completedSets.length === 0) continue;
 
     const priorSets = await prisma.workoutSet.findMany({
       where: {
         completed: true,
+        type: { not: SetType.WARMUP },
         workoutExercise: {
           exerciseId: we.exerciseId,
           sessionId: { not: sessionId },

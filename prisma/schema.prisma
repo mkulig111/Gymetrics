@@ -17,6 +17,13 @@ enum ExerciseType {
   TIME
 }
 
+enum SetType {
+  WORK
+  WARMUP
+  DROP
+  FAILURE
+}
+
 model Exercise {
   id        String       @id @default(cuid())
   name      String
@@ -110,6 +117,7 @@ model WorkoutSet {
   workoutExerciseId String
   workoutExercise   WorkoutExercise @relation(fields: [workoutExerciseId], references: [id], onDelete: Cascade)
   setIndex          Int
+  type              SetType         @default(WORK)
   weightKg          Float?
   reps              Int?
   seconds           Int?

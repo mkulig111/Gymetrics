@@ -1,5 +1,5 @@
 import { getSessionDetail } from "@/lib/actions/history";
-import { ExerciseType } from "@/generated/prisma";
+import { ExerciseType, SetType } from "@/generated/prisma";
 
 function setLoad(
   type: ExerciseType,
@@ -16,7 +16,9 @@ export function muscleVolume(
 ) {
   const volume = new Map<string, number>();
   for (const we of session.exercises) {
-    const load = we.sets.filter((s) => s.completed).reduce((sum, s) => sum + setLoad(we.exercise.type, s), 0);
+    const load = we.sets
+      .filter((s) => s.completed && s.type !== SetType.WARMUP)
+      .reduce((sum, s) => sum + setLoad(we.exercise.type, s), 0);
     if (load === 0) continue;
     for (const bp of we.exercise.bodyParts) {
       const name = bp.bodyPart.name;
