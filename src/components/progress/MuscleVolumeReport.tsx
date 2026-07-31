@@ -11,7 +11,6 @@ const INTERVALS: { value: MuscleVolumeInterval; label: string }[] = [
   { value: "monthly", label: "Monthly" },
 ];
 
-// Roll detailed muscle names up into 7 main body-part groups
 const MUSCLE_TO_GROUP: Record<string, string> = {
   Chest: "Chest",
   Back: "Back",
@@ -41,6 +40,17 @@ const GROUP_COLORS: Record<string, string> = {
   Core: "#eab308",
 };
 
+// Short labels for the x-axis
+const GROUP_LABEL: Record<string, string> = {
+  Chest: "Chest",
+  Back: "Back",
+  Shoulders: "Shld",
+  Arms: "Arms",
+  Legs: "Legs",
+  Glutes: "Glut",
+  Core: "Core",
+};
+
 function aggregateGroups(muscleVolume: { muscle: string; volume: number }[]) {
   const map = new Map<string, number>();
   for (const { muscle, volume } of muscleVolume) {
@@ -51,36 +61,100 @@ function aggregateGroups(muscleVolume: { muscle: string; volume: number }[]) {
   return GROUP_ORDER.filter((g) => map.has(g)).map((g) => ({ group: g, volume: map.get(g)! }));
 }
 
-function polarXY(cx: number, cy: number, r: number, deg: number) {
-  const rad = ((deg - 90) * Math.PI) / 180;
-  return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
-}
+// Pareto chart: bars sorted descending + cumulative % line
+function ParetoChart({ groups }: { groups: { group: string; volume: number }[] }) {
+  const sorted = [...groups].sort((a, b) => b.volume - a.volume);
+  const total = sorted.reduce((s, g) => s + g.volume, 0);
+  const maxVol = sorted[0]?.volume ?? 1;
+  const n = sorted.length;
 
-function arcPath(cx: number, cy: number, r: number, startDeg: number, endDeg: number) {
-  if (endDeg - startDeg >= 359.99) {
-    return `M ${cx} ${cy - r} A ${r} ${r} 0 1 1 ${cx - 0.001} ${cy - r} Z`;
-  }
-  const s = polarXY(cx, cy, r, startDeg);
-  const e = polarXY(cx, cy, r, endDeg);
-  const large = endDeg - startDeg > 180 ? 1 : 0;
-  return `M ${cx} ${cy} L ${s.x} ${s.y} A ${r} ${r} 0 ${large} 1 ${e.x} ${e.y} Z`;
-}
+  // Layout
+  const W = 300, H = 185;
+  const mt = 12, mb = 38, ml = 8, mr = 32;
+  const cw = W - ml - mr;
+  const ch = H - mt - mb;
+  const gap = 5;
+  const barW = (cw - gap * (n - 1)) / n;
 
-function PieChart({ groups }: { groups: { group: string; volume: number }[] }) {
-  const total = groups.reduce((s, g) => s + g.volume, 0);
-  const cx = 100;
-  const cy = 100;
-  const r = 88;
-  let angle = 0;
+  // Cumulative line points (right edge of each bar, after accumulating that bar's %)
+  let cum = 0;
+  const linePoints: { x: number; y: number; pct: number }[] = sorted.map((g, i) => {
+    cum += (g.volume / total) * 100;
+    return {
+      x: ml + i * (barW + gap) + barW,
+      y: mt + ch * (1 - cum / 100),
+      pct: cum,
+    };
+  });
+
+  const polyline = linePoints.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
+
+  // Right-axis % guide lines: 25, 50, 75, 100
+  const pctGuides = [25, 50, 75, 100];
 
   return (
-    <svg viewBox="0 0 200 200" className="mx-auto w-44">
-      {groups.map(({ group, volume }) => {
-        const sweep = (volume / total) * 360;
-        const d = arcPath(cx, cy, r, angle, angle + sweep);
-        angle += sweep;
-        return <path key={group} d={d} fill={GROUP_COLORS[group] ?? "#888"} />;
+    <svg viewBox={`0 0 ${W} ${H}`} className="w-full">
+      {/* % guide lines (right axis) */}
+      {pctGuides.map((pct) => {
+        const gy = mt + ch * (1 - pct / 100);
+        return (
+          <g key={pct}>
+            <line
+              x1={ml} y1={gy} x2={W - mr} y2={gy}
+              stroke="currentColor" strokeOpacity={0.1} strokeWidth={1}
+              strokeDasharray={pct === 100 ? "none" : "3,3"}
+            />
+            <text x={W - mr + 4} y={gy + 3} fontSize={8} fill="currentColor" fillOpacity={0.45}>
+              {pct}%
+            </text>
+          </g>
+        );
       })}
+
+      {/* Bars */}
+      {sorted.map((g, i) => {
+        const bx = ml + i * (barW + gap);
+        const bh = (g.volume / maxVol) * ch;
+        const by = mt + ch - bh;
+        return (
+          <g key={g.group}>
+            <rect x={bx} y={by} width={barW} height={bh} fill={GROUP_COLORS[g.group] ?? "#888"} rx={2} />
+            {/* value label above bar */}
+            <text
+              x={bx + barW / 2} y={by - 3}
+              textAnchor="middle" fontSize={7} fill="currentColor" fillOpacity={0.7}
+            >
+              {Math.round(g.volume)}
+            </text>
+            {/* x-axis label */}
+            <text
+              x={bx + barW / 2} y={H - mb + 13}
+              textAnchor="middle" fontSize={8.5} fill="currentColor" fillOpacity={0.8}
+            >
+              {GROUP_LABEL[g.group] ?? g.group}
+            </text>
+          </g>
+        );
+      })}
+
+      {/* Cumulative line */}
+      <polyline points={polyline} fill="none" stroke="#ffffff" strokeWidth={1.5} strokeOpacity={0.6} />
+
+      {/* Cumulative dots + % labels */}
+      {linePoints.map((p, i) => (
+        <g key={i}>
+          <circle cx={p.x} cy={p.y} r={2.5} fill="#ffffff" fillOpacity={0.85} />
+          {/* show % only at last point */}
+          {i === linePoints.length - 1 && (
+            <text x={p.x - 2} y={p.y - 5} textAnchor="middle" fontSize={7} fill="#ffffff" fillOpacity={0.6}>
+              100%
+            </text>
+          )}
+        </g>
+      ))}
+
+      {/* x-axis baseline */}
+      <line x1={ml} y1={mt + ch} x2={W - mr} y2={mt + ch} stroke="currentColor" strokeOpacity={0.2} strokeWidth={1} />
     </svg>
   );
 }
@@ -107,7 +181,6 @@ export default function MuscleVolumeReport({ initialReport }: { initialReport: R
   }
 
   const groups = aggregateGroups(report.muscleVolume);
-  const total = groups.reduce((s, g) => s + g.volume, 0);
 
   return (
     <div className="rounded-xl bg-surface p-4">
@@ -155,28 +228,7 @@ export default function MuscleVolumeReport({ initialReport }: { initialReport: R
             No completed sets in this period yet.
           </p>
         ) : (
-          <>
-            <PieChart groups={groups} />
-            <div className="mt-4 space-y-2">
-              {groups.map(({ group, volume }) => (
-                <div key={group} className="flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-2">
-                    <span
-                      className="h-3 w-3 flex-shrink-0 rounded-full"
-                      style={{ backgroundColor: GROUP_COLORS[group] }}
-                    />
-                    <span>{group}</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="font-semibold">{Math.round(volume)}</span>
-                    <span className="w-9 text-right text-muted">
-                      {Math.round((volume / total) * 100)}%
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </>
+          <ParetoChart groups={groups} />
         )}
       </div>
     </div>
