@@ -18,7 +18,7 @@ export default function NewExerciseButton() {
 
   return (
     <Button variant="secondary" className="w-full" disabled={loading} onClick={handleClick}>
-      ➕ New Exercise
+      + New Exercise
     </Button>
   );
 }

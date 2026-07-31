@@ -9,18 +9,20 @@ export default async function ExercisesPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">Exercises</h1>
+      <h1 className="text-xl font-bold">Exercises</h1>
+
+      <div className="flex gap-2">
+        <div className="flex-1">
+          <NewExerciseButton />
+        </div>
         <Link
           href="/exercises/body-parts"
           aria-label="Manage body parts"
-          className="flex h-8 w-8 items-center justify-center rounded-lg text-muted hover:text-foreground"
+          className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-xl bg-surface-2 text-muted hover:text-foreground"
         >
           <IconAdjustmentsHorizontal className="h-5 w-5" stroke={1.5} />
         </Link>
       </div>
-
-      <NewExerciseButton />
 
       <ExercisesClient exercises={exercises} />
     </div>
