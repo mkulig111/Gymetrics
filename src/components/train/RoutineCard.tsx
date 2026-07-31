@@ -119,11 +119,9 @@ export default function RoutineCard({
             {isDeloadDue ? "Czas na deload!" : `${routine.workoutsSinceDeload} / ${routine.deloadInterval}`}
           </span>
         </div>
-        <div className="h-3 w-full overflow-hidden rounded-full bg-surface-2">
-          <div
-            className="h-full rounded-full transition-all"
-            style={{ width: `${progress * 100}%`, background: "linear-gradient(to right, #22c55e, #f97316, #ef4444)" }}
-          />
+        <div className="relative h-3 w-full overflow-hidden rounded-full bg-surface-2">
+          <div className="absolute inset-0" style={{ background: "linear-gradient(to right, #22c55e, #f97316, #ef4444)" }} />
+          <div className="absolute right-0 top-0 h-full bg-surface-2 transition-all" style={{ width: `${(1 - progress) * 100}%` }} />
         </div>
       </div>
 
