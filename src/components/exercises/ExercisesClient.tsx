@@ -7,22 +7,6 @@ import { IconPencil, IconSearch } from "@tabler/icons-react";
 type BodyPartEntry = { percentage: number; bodyPart: { id: string; name: string } };
 type Exercise = { id: string; name: string; bodyParts: BodyPartEntry[] };
 
-const PALETTE = [
-  { bg: "rgba(124,58,237,0.15)", color: "#a78bfa" },
-  { bg: "rgba(13,148,136,0.15)", color: "#2dd4bf" },
-  { bg: "rgba(234,88,12,0.15)",  color: "#fb923c" },
-  { bg: "rgba(29,78,216,0.15)",  color: "#60a5fa" },
-  { bg: "rgba(190,24,93,0.15)",  color: "#f472b6" },
-  { bg: "rgba(146,64,14,0.15)",  color: "#fbbf24" },
-  { bg: "rgba(21,128,61,0.15)",  color: "#4ade80" },
-  { bg: "rgba(185,28,28,0.15)",  color: "#f87171" },
-];
-
-function paletteFor(name: string) {
-  let h = 0;
-  for (const c of name) h = (h * 31 + c.charCodeAt(0)) & 0xffff;
-  return PALETTE[h % PALETTE.length];
-}
 
 export default function ExercisesClient({ exercises }: { exercises: Exercise[] }) {
   const [query, setQuery] = useState("");
@@ -55,7 +39,6 @@ export default function ExercisesClient({ exercises }: { exercises: Exercise[] }
             (best, bp) => (!best || bp.percentage > best.percentage ? bp : best),
             null,
           );
-          const pal = primary ? paletteFor(primary.bodyPart.name) : PALETTE[0];
           const letter = primary ? primary.bodyPart.name[0].toUpperCase() : "?";
 
           return (
@@ -64,28 +47,21 @@ export default function ExercisesClient({ exercises }: { exercises: Exercise[] }
               href={`/exercises/${ex.id}/edit`}
               className="flex items-center gap-3 rounded-xl bg-surface p-3 hover:bg-surface-2"
             >
-              <div
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold"
-                style={{ background: pal.bg, color: pal.color }}
-              >
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-surface-2 text-sm font-bold text-accent">
                 {letter}
               </div>
               <div className="min-w-0 flex-1">
                 <p className="font-semibold">{ex.name}</p>
                 {ex.bodyParts.length > 0 ? (
                   <div className="mt-1 flex flex-wrap gap-1">
-                    {ex.bodyParts.map((bp) => {
-                      const p = paletteFor(bp.bodyPart.name);
-                      return (
-                        <span
-                          key={bp.bodyPart.id}
-                          className="rounded-full px-2 py-0.5 text-xs font-medium"
-                          style={{ background: p.bg, color: p.color }}
-                        >
-                          {bp.bodyPart.name}
-                        </span>
-                      );
-                    })}
+                    {ex.bodyParts.map((bp) => (
+                      <span
+                        key={bp.bodyPart.id}
+                        className="rounded-full bg-surface-2 px-2 py-0.5 text-xs text-muted"
+                      >
+                        {bp.bodyPart.name}
+                      </span>
+                    ))}
                   </div>
                 ) : (
                   <p className="text-xs text-muted">No body parts assigned</p>
