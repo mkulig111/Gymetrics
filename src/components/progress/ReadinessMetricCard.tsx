@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import WeeklyTrendChart from "@/components/progress/WeeklyTrendChart";
-import { buildWeekDays, bucketValuesByDay, weekRangeLabel } from "@/lib/weeklyChart";
 
 type Entry = { id: string; date: Date; value: number };
 
@@ -12,6 +11,13 @@ const BASELINE_MIN = 3;
 
 function mean(values: number[]) {
   return values.reduce((sum, v) => sum + v, 0) / values.length;
+}
+
+function rangeLabel(entries: Entry[]) {
+  if (entries.length === 0) return "";
+  const fmt = (d: Date) => new Date(d).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  if (entries.length === 1) return fmt(entries[0].date);
+  return `${fmt(entries[0].date)} – ${fmt(entries[entries.length - 1].date)}`;
 }
 
 export default function ReadinessMetricCard({
@@ -62,13 +68,6 @@ export default function ReadinessMetricCard({
     router.refresh();
   }
 
-  const days = buildWeekDays();
-  const values = bucketValuesByDay(entries, days);
-  const present = values.filter((v): v is number => v !== null);
-  const weekAvg = present.length ? present.reduce((sum, v) => sum + v, 0) / present.length : null;
-  const headerValue = weekAvg ?? latest?.value ?? null;
-  const headerLabel = weekAvg !== null ? "Average" : "Latest";
-
   return (
     <div className="rounded-xl bg-surface p-4">
       <div className="mb-3 flex items-center justify-between">
@@ -104,15 +103,15 @@ export default function ReadinessMetricCard({
         <>
           <div className="mb-2 flex items-end justify-between">
             <div>
-              <p className="text-xs text-muted">{headerLabel}</p>
+              <p className="text-xs text-muted">Latest</p>
               <p className="text-2xl font-bold">
-                {headerValue!.toFixed(decimals)} <span className="text-base text-muted">{unit}</span>
+                {latest.value.toFixed(decimals)} <span className="text-base text-muted">{unit}</span>
               </p>
             </div>
-            <p className="text-xs text-muted">{weekRangeLabel(days)}</p>
+            <p className="text-xs text-muted">{rangeLabel(entries)}</p>
           </div>
 
-          <WeeklyTrendChart values={values} days={days} />
+          <WeeklyTrendChart entries={entries} />
 
           {baselineMean === null ? (
             <p className="mt-2 text-xs text-muted">

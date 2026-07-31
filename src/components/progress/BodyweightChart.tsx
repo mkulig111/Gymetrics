@@ -4,9 +4,15 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { addBodyweightEntry } from "@/lib/actions/progress";
 import WeeklyTrendChart from "@/components/progress/WeeklyTrendChart";
-import { buildWeekDays, bucketValuesByDay, weekRangeLabel } from "@/lib/weeklyChart";
 
 type Entry = { id: string; date: Date; weightKg: number };
+
+function rangeLabel(entries: Entry[]) {
+  if (entries.length === 0) return "";
+  const fmt = (d: Date) => new Date(d).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  if (entries.length === 1) return fmt(entries[0].date);
+  return `${fmt(entries[0].date)} – ${fmt(entries[entries.length - 1].date)}`;
+}
 
 export default function BodyweightChart({ entries }: { entries: Entry[] }) {
   const router = useRouter();
@@ -23,13 +29,6 @@ export default function BodyweightChart({ entries }: { entries: Entry[] }) {
     setShowForm(false);
     router.refresh();
   }
-
-  const days = buildWeekDays();
-  const values = bucketValuesByDay(entries.map((e) => ({ date: e.date, value: e.weightKg })), days);
-  const present = values.filter((v): v is number => v !== null);
-  const weekAvg = present.length ? present.reduce((sum, v) => sum + v, 0) / present.length : null;
-  const headerValue = weekAvg ?? latest?.weightKg ?? null;
-  const headerLabel = weekAvg !== null ? "Average" : "Latest";
 
   return (
     <div className="rounded-xl bg-surface p-4">
@@ -65,14 +64,14 @@ export default function BodyweightChart({ entries }: { entries: Entry[] }) {
         <>
           <div className="mb-2 flex items-end justify-between">
             <div>
-              <p className="text-xs text-muted">{headerLabel}</p>
+              <p className="text-xs text-muted">Latest</p>
               <p className="text-2xl font-bold">
-                {headerValue!.toFixed(1)} <span className="text-base text-muted">kg</span>
+                {latest.weightKg.toFixed(1)} <span className="text-base text-muted">kg</span>
               </p>
             </div>
-            <p className="text-xs text-muted">{weekRangeLabel(days)}</p>
+            <p className="text-xs text-muted">{rangeLabel(entries)}</p>
           </div>
-          <WeeklyTrendChart values={values} days={days} />
+          <WeeklyTrendChart entries={entries.map((e) => ({ date: e.date, value: e.weightKg }))} />
         </>
       )}
     </div>
