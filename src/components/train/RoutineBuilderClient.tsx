@@ -35,18 +35,21 @@ export default function RoutineBuilderClient({
   routineId,
   initialName,
   initialNotes,
+  initialDeloadInterval,
   initialExercises,
   exerciseLibrary,
 }: {
   routineId: string;
   initialName: string;
   initialNotes: string;
+  initialDeloadInterval: number;
   initialExercises: RoutineExerciseData[];
   exerciseLibrary: ExerciseOption[];
 }) {
   const router = useRouter();
   const [name, setName] = useState(initialName);
   const [notes, setNotes] = useState(initialNotes);
+  const [deloadInterval, setDeloadInterval] = useState(initialDeloadInterval);
   const [exercises, setExercises] = useState(initialExercises);
   const [showAddExercise, setShowAddExercise] = useState(false);
   const [swapTarget, setSwapTarget] = useState<string | null>(null);
@@ -64,7 +67,7 @@ export default function RoutineBuilderClient({
 
   function onNameBlur() {
     startTransition(() => {
-      updateRoutineDetails(routineId, { name, notes });
+      updateRoutineDetails(routineId, { name, notes, deloadInterval });
     });
   }
 
@@ -167,9 +170,22 @@ export default function RoutineBuilderClient({
         onChange={(e) => setNotes(e.target.value)}
         onBlur={onNameBlur}
         placeholder="Notes (e.g. 3 sets of 60 sec. 30-60 sec rest between sets)"
-        className="mb-6 w-full resize-none rounded-lg border border-border bg-surface-2 px-3 py-2 text-sm outline-none focus:border-accent"
+        className="mb-4 w-full resize-none rounded-lg border border-border bg-surface-2 px-3 py-2 text-sm outline-none focus:border-accent"
         rows={2}
       />
+
+      <div className="mb-6 flex items-center gap-3">
+        <label className="text-sm text-muted">Deload co ile treningów</label>
+        <input
+          type="number"
+          min={1}
+          max={52}
+          value={deloadInterval}
+          onChange={(e) => setDeloadInterval(Math.max(1, parseInt(e.target.value) || 1))}
+          onBlur={onNameBlur}
+          className="w-20 rounded-lg border border-border bg-surface-2 px-2 py-1 text-center text-sm outline-none focus:border-accent"
+        />
+      </div>
 
       <div className="space-y-6">
         {exercises.map((re, reIndex) => (

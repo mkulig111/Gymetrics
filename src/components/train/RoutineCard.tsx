@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Button from "@/components/ui/Button";
 import { IconArchive, IconArchiveOff, IconDumbbell, IconPencil, IconPlayerPlay, IconTrash } from "@tabler/icons-react";
-import { archiveRoutine, deleteRoutine, unarchiveRoutine } from "@/lib/actions/routines";
+import { archiveRoutine, deleteRoutine, resetDeload, unarchiveRoutine } from "@/lib/actions/routines";
 import { startWorkoutFromRoutine } from "@/lib/actions/workouts";
 
 export default function RoutineCard({
@@ -15,6 +15,8 @@ export default function RoutineCard({
   routine: {
     id: string;
     name: string;
+    deloadInterval: number;
+    workoutsSinceDeload: number;
     exercises: { id: string; exercise: { name: string }; sets: { id: string }[] }[];
   };
   archived?: boolean;
@@ -41,7 +43,20 @@ export default function RoutineCard({
     router.refresh();
   }
 
+  async function handleResetDeload() {
+    setMenuOpen(false);
+    await resetDeload(routine.id);
+    router.refresh();
+  }
+
   const totalSets = routine.exercises.reduce((sum, e) => sum + e.sets.length, 0);
+  const progress = Math.min(routine.workoutsSinceDeload / routine.deloadInterval, 1);
+  const isDeloadDue = routine.workoutsSinceDeload >= routine.deloadInterval;
+  const barColor = isDeloadDue
+    ? "#ef4444"
+    : progress >= 0.75
+      ? "#f97316"
+      : "#22c55e";
 
   return (
     <div className="rounded-xl bg-surface p-4">
@@ -59,7 +74,7 @@ export default function RoutineCard({
             ···
           </button>
           {menuOpen && (
-            <div className="absolute right-0 top-8 z-20 min-w-[140px] overflow-hidden rounded-lg bg-surface-2 shadow-lg">
+            <div className="absolute right-0 top-8 z-20 min-w-[160px] overflow-hidden rounded-lg bg-surface-2 shadow-lg">
               {archived ? (
                 <button
                   onClick={handleUnarchive}
@@ -75,6 +90,12 @@ export default function RoutineCard({
                   <IconArchive className="h-4 w-4" stroke={1.5} /> Archive
                 </button>
               )}
+              <button
+                onClick={handleResetDeload}
+                className="flex w-full items-center gap-2 border-t border-border px-4 py-3 text-sm hover:bg-border"
+              >
+                Reset deload counter
+              </button>
               <button
                 onClick={handleDelete}
                 className="flex w-full items-center gap-2 border-t border-border px-4 py-3 text-sm text-danger hover:bg-border"
@@ -95,6 +116,22 @@ export default function RoutineCard({
         ))}
         {routine.exercises.length > 4 && <li>+{routine.exercises.length - 4} more</li>}
       </ul>
+
+      <div className="mb-3">
+        <div className="mb-1 flex items-center justify-between text-xs text-muted">
+          <span>Deload</span>
+          <span className={isDeloadDue ? "font-semibold text-red-500" : ""}>
+            {isDeloadDue ? "Czas na deload!" : `${routine.workoutsSinceDeload} / ${routine.deloadInterval}`}
+          </span>
+        </div>
+        <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-2">
+          <div
+            className="h-full rounded-full transition-all"
+            style={{ width: `${progress * 100}%`, backgroundColor: barColor }}
+          />
+        </div>
+      </div>
+
       {!archived && (
         <div className="flex gap-2">
           <Link

@@ -10,13 +10,14 @@ export default async function TrainPage() {
 
   return (
     <div className="space-y-6">
-      <form action={startEmptyWorkout}>
-        <Button variant="primary" type="submit" className="flex w-full items-center justify-center gap-2 py-4 text-base">
-          <IconBolt className="h-4 w-4" stroke={1.5} /> Start Empty Workout
-        </Button>
-      </form>
-
-      <NewRoutineButton />
+      <div className="flex gap-2">
+        <form action={startEmptyWorkout} className="flex-1">
+          <Button variant="primary" type="submit" className="flex w-full items-center justify-center gap-2 py-4 text-base">
+            <IconBolt className="h-4 w-4" stroke={1.5} /> Start Empty Workout
+          </Button>
+        </form>
+        <NewRoutineButton />
+      </div>
 
       <div>
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted">

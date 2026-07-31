@@ -62,11 +62,16 @@ export async function createRoutine(name: string) {
 
 export async function updateRoutineDetails(
   routineId: string,
-  data: { name?: string; notes?: string },
+  data: { name?: string; notes?: string; deloadInterval?: number },
 ) {
   await prisma.routine.update({ where: { id: routineId }, data });
   revalidatePath("/train");
   revalidatePath(`/train/routines/${routineId}/edit`);
+}
+
+export async function resetDeload(routineId: string) {
+  await prisma.routine.update({ where: { id: routineId }, data: { workoutsSinceDeload: 0 } });
+  revalidatePath("/train");
 }
 
 export async function deleteRoutine(routineId: string) {

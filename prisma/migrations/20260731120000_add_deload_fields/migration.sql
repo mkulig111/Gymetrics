@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Routine" ADD COLUMN "deloadInterval" INTEGER NOT NULL DEFAULT 6;
+ALTER TABLE "Routine" ADD COLUMN "workoutsSinceDeload" INTEGER NOT NULL DEFAULT 0;

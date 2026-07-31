@@ -195,6 +195,14 @@ export async function finishWorkout(sessionId: string) {
     data: { finishedAt: new Date() },
   });
 
+  if (session.routineId) {
+    await prisma.routine.update({
+      where: { id: session.routineId },
+      data: { workoutsSinceDeload: { increment: 1 } },
+    });
+  }
+
+  revalidatePath("/train");
   revalidatePath("/history");
   revalidatePath("/progress");
   redirect(`/history/${sessionId}`);
