@@ -1,3 +1,4 @@
+import { Zap } from "lucide-react";
 import { getArchivedRoutines, getRoutines } from "@/lib/actions/routines";
 import { startEmptyWorkout } from "@/lib/actions/workouts";
 import RoutineCard from "@/components/train/RoutineCard";
@@ -10,8 +11,8 @@ export default async function TrainPage() {
   return (
     <div className="space-y-6">
       <form action={startEmptyWorkout}>
-        <Button variant="primary" type="submit" className="w-full py-4 text-base">
-          ⚡ Start Empty Workout
+        <Button variant="primary" type="submit" className="flex w-full items-center justify-center gap-2 py-4 text-base">
+          <Zap className="h-4 w-4" /> Start Empty Workout
         </Button>
       </form>
 
