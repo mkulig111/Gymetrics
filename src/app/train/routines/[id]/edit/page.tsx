@@ -19,6 +19,7 @@ export default async function EditRoutinePage({
       routineId={routine.id}
       initialName={routine.name}
       initialNotes={routine.notes ?? ""}
+      initialLabel={routine.label}
       initialDeloadInterval={routine.deloadInterval}
       initialExercises={routine.exercises}
       exerciseLibrary={exerciseLibrary}

@@ -61,6 +61,7 @@ model Routine {
   notes               String?
   order               Int      @default(0)
   archived            Boolean  @default(false)
+  label               String   @default("")
   deloadInterval      Int      @default(6)
   workoutsSinceDeload Int      @default(0)
   createdAt           DateTime @default(now())

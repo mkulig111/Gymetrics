@@ -10,23 +10,37 @@ function mondayOf(d: Date) {
   return startOfDay(monday);
 }
 
-export function buildStreakGrid(workoutDates: Date[], weeksToShow = 5) {
+export function buildStreakGrid(
+  workouts: { date: Date; label: string }[],
+  weeksToShow = 5,
+) {
   const today = startOfDay(new Date());
-  const daySet = new Set(workoutDates.map((d) => startOfDay(d).getTime()));
+
+  // Map timestamp → labels for that day
+  const dayMap = new Map<number, string[]>();
+  for (const { date, label } of workouts) {
+    const t = startOfDay(date).getTime();
+    const existing = dayMap.get(t) ?? [];
+    if (label && !existing.includes(label)) existing.push(label);
+    dayMap.set(t, existing);
+  }
+
   const currentMonday = mondayOf(today);
   const firstMonday = new Date(currentMonday);
   firstMonday.setDate(firstMonday.getDate() - 7 * (weeksToShow - 1));
 
-  const weeks: { date: Date; hasWorkout: boolean; isToday: boolean }[][] = [];
+  const weeks: { date: Date; hasWorkout: boolean; isToday: boolean; labels: string[] }[][] = [];
   for (let w = 0; w < weeksToShow; w++) {
-    const week: { date: Date; hasWorkout: boolean; isToday: boolean }[] = [];
+    const week: { date: Date; hasWorkout: boolean; isToday: boolean; labels: string[] }[] = [];
     for (let d = 0; d < 7; d++) {
       const date = new Date(firstMonday);
       date.setDate(firstMonday.getDate() + w * 7 + d);
+      const labels = dayMap.get(date.getTime()) ?? [];
       week.push({
         date,
-        hasWorkout: daySet.has(date.getTime()),
+        hasWorkout: labels.length > 0 || dayMap.has(date.getTime()),
         isToday: date.getTime() === today.getTime(),
+        labels,
       });
     }
     weeks.push(week);
@@ -34,9 +48,9 @@ export function buildStreakGrid(workoutDates: Date[], weeksToShow = 5) {
   return weeks;
 }
 
-export function computeWeekStreak(workoutDates: Date[]) {
+export function computeWeekStreak(workouts: { date: Date; label: string }[]) {
   const today = startOfDay(new Date());
-  const daySet = new Set(workoutDates.map((d) => startOfDay(d).getTime()));
+  const daySet = new Set(workouts.map(({ date }) => startOfDay(date).getTime()));
   let monday = mondayOf(today);
   let streak = 0;
 

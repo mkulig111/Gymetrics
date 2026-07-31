@@ -101,9 +101,9 @@ export async function getMuscleVolumeReport(interval: MuscleVolumeInterval) {
 export async function getWorkoutDates() {
   const sessions = await prisma.workoutSession.findMany({
     where: { finishedAt: { not: null } },
-    select: { startedAt: true },
+    select: { startedAt: true, routine: { select: { label: true } } },
   });
-  return sessions.map((s) => s.startedAt);
+  return sessions.map((s) => ({ date: s.startedAt, label: s.routine?.label ?? "" }));
 }
 
 export async function getBodyweightEntries() {
