@@ -1,0 +1,1 @@
+ALTER TABLE "Routine" ADD COLUMN "label" TEXT NOT NULL DEFAULT '';

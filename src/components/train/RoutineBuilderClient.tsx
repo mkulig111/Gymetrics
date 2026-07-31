@@ -35,6 +35,7 @@ export default function RoutineBuilderClient({
   routineId,
   initialName,
   initialNotes,
+  initialLabel,
   initialDeloadInterval,
   initialExercises,
   exerciseLibrary,
@@ -42,6 +43,7 @@ export default function RoutineBuilderClient({
   routineId: string;
   initialName: string;
   initialNotes: string;
+  initialLabel: string;
   initialDeloadInterval: number;
   initialExercises: RoutineExerciseData[];
   exerciseLibrary: ExerciseOption[];
@@ -49,6 +51,7 @@ export default function RoutineBuilderClient({
   const router = useRouter();
   const [name, setName] = useState(initialName);
   const [notes, setNotes] = useState(initialNotes);
+  const [label, setLabel] = useState(initialLabel);
   const [deloadInterval, setDeloadInterval] = useState(initialDeloadInterval);
   const [exercises, setExercises] = useState(initialExercises);
   const [showAddExercise, setShowAddExercise] = useState(false);
@@ -67,7 +70,7 @@ export default function RoutineBuilderClient({
 
   function onNameBlur() {
     startTransition(() => {
-      updateRoutineDetails(routineId, { name, notes, deloadInterval });
+      updateRoutineDetails(routineId, { name, notes, deloadInterval, label });
     });
   }
 
@@ -158,13 +161,23 @@ export default function RoutineBuilderClient({
 
   return (
     <div className="pb-20">
-      <input
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        onBlur={onNameBlur}
-        className="mb-2 w-full bg-transparent text-2xl font-bold outline-none"
-        placeholder="Routine name"
-      />
+      <div className="mb-2 flex items-center gap-3">
+        <input
+          value={label}
+          onChange={(e) => setLabel(e.target.value.toUpperCase().slice(0, 2))}
+          onBlur={onNameBlur}
+          maxLength={2}
+          placeholder="A"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent text-center text-sm font-bold text-black outline-none placeholder:text-black/50"
+        />
+        <input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          onBlur={onNameBlur}
+          className="flex-1 bg-transparent text-2xl font-bold outline-none"
+          placeholder="Routine name"
+        />
+      </div>
       <textarea
         value={notes}
         onChange={(e) => setNotes(e.target.value)}

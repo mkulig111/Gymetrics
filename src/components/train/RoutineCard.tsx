@@ -15,6 +15,7 @@ export default function RoutineCard({
   routine: {
     id: string;
     name: string;
+    label: string;
     deloadInterval: number;
     workoutsSinceDeload: number;
     exercises: { id: string; exercise: { name: string }; sets: { id: string }[] }[];
@@ -56,7 +57,12 @@ export default function RoutineCard({
   return (
     <div className="rounded-xl bg-surface p-4">
       <div className="mb-2 flex items-start justify-between">
-        <Link href={`/train/routines/${routine.id}/edit`} className="text-lg font-bold hover:text-accent">
+        <Link href={`/train/routines/${routine.id}/edit`} className="flex items-center gap-2 text-lg font-bold hover:text-accent">
+          {routine.label && (
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent text-xs font-bold text-black">
+              {routine.label.slice(0, 2).toUpperCase()}
+            </span>
+          )}
           {routine.name}
         </Link>
         <div className="relative">
