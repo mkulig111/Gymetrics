@@ -30,15 +30,7 @@ const MUSCLE_TO_GROUP: Record<string, string> = {
 
 const GROUP_ORDER = ["Chest", "Back", "Shoulders", "Arms", "Legs", "Glutes", "Core"] as const;
 
-const GROUP_COLORS: Record<string, string> = {
-  Chest: "#3b82f6",
-  Back: "#22c55e",
-  Shoulders: "#a855f7",
-  Arms: "#f97316",
-  Legs: "#06b6d4",
-  Glutes: "#ec4899",
-  Core: "#eab308",
-};
+const BAR_COLOR = "#f5b700";
 
 // Short labels for the x-axis
 const GROUP_LABEL: Record<string, string> = {
@@ -118,7 +110,7 @@ function ParetoChart({ groups }: { groups: { group: string; volume: number }[] }
         const by = mt + ch - bh;
         return (
           <g key={g.group}>
-            <rect x={bx} y={by} width={barW} height={bh} fill={GROUP_COLORS[g.group] ?? "#888"} rx={2} />
+            <rect x={bx} y={by} width={barW} height={bh} fill={BAR_COLOR} rx={2} />
             {/* value label above bar */}
             <text
               x={bx + barW / 2} y={by - 3}
