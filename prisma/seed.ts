@@ -150,6 +150,11 @@ const exercises: { name: string; muscleGroup: string; type: ExerciseType }[] = [
   { name: "World's Greatest Stretch", muscleGroup: "Hips", type: T },
   { name: "Pigeon Stretch", muscleGroup: "Glutes", type: T },
   { name: "Doorway Chest Stretch", muscleGroup: "Chest", type: T },
+  // A/B training plan
+  { name: "Military Press", muscleGroup: "Shoulders", type: W },
+  { name: "Single-Leg RDL", muscleGroup: "Hamstrings", type: W },
+  { name: "TKE with Band", muscleGroup: "Quadriceps", type: B },
+  { name: "Wall Sit", muscleGroup: "Quadriceps", type: T },
 ];
 
 // Multi-body-part percentage breakdowns sourced from free-weights exercise data.
@@ -264,6 +269,25 @@ const bodyPartOverrides: { exerciseName: string; bodyParts: { name: string; perc
     { name: "Triceps", percentage: 15 },
     { name: "Core", percentage: 15 },
   ]},
+  { exerciseName: "Military Press", bodyParts: [
+    { name: "Shoulders", percentage: 60 },
+    { name: "Triceps", percentage: 25 },
+    { name: "Core", percentage: 10 },
+    { name: "Traps", percentage: 5 },
+  ]},
+  { exerciseName: "Single-Leg RDL", bodyParts: [
+    { name: "Hamstrings", percentage: 40 },
+    { name: "Glutes", percentage: 35 },
+    { name: "Lower Back", percentage: 15 },
+    { name: "Core", percentage: 10 },
+  ]},
+  { exerciseName: "TKE with Band", bodyParts: [
+    { name: "Quadriceps", percentage: 100 },
+  ]},
+  { exerciseName: "Wall Sit", bodyParts: [
+    { name: "Quadriceps", percentage: 80 },
+    { name: "Glutes", percentage: 20 },
+  ]},
 ];
 
 // Historical 5x5 training log (Squat / Bench Press / Deadlift), imported once and
@@ -289,6 +313,46 @@ const trainingLogDateCorrections: Record<string, string> = {
   "2024-06-21": "2026-06-21",
   "2024-06-24": "2026-06-24",
 };
+
+type RoutineSetDef = { targetReps?: number | null; targetSeconds?: number | null };
+type RoutineExDef = { exerciseName: string; notes?: string; sets: RoutineSetDef[] };
+
+function makeSets(count: number, def: RoutineSetDef): RoutineSetDef[] {
+  return Array.from({ length: count }, () => def);
+}
+
+const abRoutines: { name: string; notes: string; order: number; exercises: RoutineExDef[] }[] = [
+  {
+    name: "Trening A — Wtorek",
+    notes: "Rozgrzewka: 5 min rower stacjonarny (niski opór, umiarkowana kadencja) + mobilizacja bioder/kostek",
+    order: 0,
+    exercises: [
+      { exerciseName: "Military Press", notes: "seria główna", sets: makeSets(3, { targetReps: 5 }) },
+      { exerciseName: "Military Press", notes: "backoff ~50%", sets: makeSets(3, { targetReps: 10 }) },
+      { exerciseName: "Back Squat", notes: "seria główna, tempo eksc. 2-3s", sets: makeSets(3, { targetReps: 5 }) },
+      { exerciseName: "Back Squat", notes: "backoff ~50%", sets: makeSets(2, { targetReps: 10 }) },
+      { exerciseName: "Single-Leg RDL", notes: "prawa noga", sets: makeSets(3, { targetReps: 8 }) },
+      { exerciseName: "Single-Leg RDL", notes: "lewa noga", sets: makeSets(2, { targetReps: 8 }) },
+      { exerciseName: "TKE with Band", notes: "prawa noga, niskie obciążenie", sets: makeSets(3, { targetReps: 15 }) },
+      { exerciseName: "TKE with Band", notes: "lewa noga, niskie obciążenie", sets: makeSets(2, { targetReps: 15 }) },
+    ],
+  },
+  {
+    name: "Trening B — Sobota",
+    notes: "Rozgrzewka: 5 min rower stacjonarny + mobilizacja",
+    order: 1,
+    exercises: [
+      { exerciseName: "Barbell Bench Press", notes: "seria główna", sets: makeSets(3, { targetReps: 5 }) },
+      { exerciseName: "Barbell Bench Press", notes: "backoff ~50%", sets: makeSets(3, { targetReps: 10 }) },
+      { exerciseName: "Romanian Deadlift", notes: "seria główna, unikaj hiperekstensji lędźwi", sets: makeSets(3, { targetReps: 5 }) },
+      { exerciseName: "Romanian Deadlift", notes: "backoff ~50%", sets: makeSets(2, { targetReps: 10 }) },
+      { exerciseName: "Barbell Row", notes: "dowolny wariant", sets: makeSets(3, { targetReps: 8 }) },
+      { exerciseName: "TKE with Band", notes: "prawa noga, niskie obciążenie", sets: makeSets(3, { targetReps: 15 }) },
+      { exerciseName: "TKE with Band", notes: "lewa noga, niskie obciążenie", sets: makeSets(2, { targetReps: 15 }) },
+      { exerciseName: "Wall Sit", notes: "submaksymalnie", sets: makeSets(3, { targetSeconds: 20 }) },
+    ],
+  },
+];
 
 async function main() {
   const bodyPartNames = [...new Set(exercises.map((e) => e.muscleGroup))];
@@ -415,6 +479,40 @@ async function main() {
     logSessionsCreated++;
   }
   console.log(`Created ${logSessionsCreated} historical training-log sessions`);
+
+  let routinesCreated = 0;
+  for (const routineDef of abRoutines) {
+    const existing = await prisma.routine.findFirst({ where: { name: routineDef.name } });
+    if (existing) continue;
+
+    const exerciseRecords = await Promise.all(
+      routineDef.exercises.map((ex) => prisma.exercise.findFirst({ where: { name: ex.exerciseName } })),
+    );
+
+    await prisma.routine.create({
+      data: {
+        name: routineDef.name,
+        notes: routineDef.notes,
+        order: routineDef.order,
+        exercises: {
+          create: routineDef.exercises.map((ex, i) => ({
+            exerciseId: exerciseRecords[i]!.id,
+            order: i,
+            notes: ex.notes,
+            sets: {
+              create: ex.sets.map((s, si) => ({
+                setIndex: si,
+                targetReps: s.targetReps ?? null,
+                targetSeconds: s.targetSeconds ?? null,
+              })),
+            },
+          })),
+        },
+      },
+    });
+    routinesCreated++;
+  }
+  console.log(`Created ${routinesCreated} A/B training routines`);
 }
 
 main()
