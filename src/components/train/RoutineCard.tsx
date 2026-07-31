@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Button from "@/components/ui/Button";
-import { IconArchive, IconArchiveOff, IconDumbbell, IconPencil, IconPlayerPlay, IconTrash } from "@tabler/icons-react";
+import { IconArchive, IconArchiveOff, IconDumbbell, IconPencil, IconPlayerPlay, IconRotate, IconTrash } from "@tabler/icons-react";
 import { archiveRoutine, deleteRoutine, resetDeload, unarchiveRoutine } from "@/lib/actions/routines";
 import { startWorkoutFromRoutine } from "@/lib/actions/workouts";
 
@@ -89,7 +89,7 @@ export default function RoutineCard({
                 onClick={handleResetDeload}
                 className="flex w-full items-center gap-2 border-t border-border px-4 py-3 text-sm hover:bg-border"
               >
-                Reset deload counter
+                <IconRotate className="h-4 w-4" stroke={1.5} /> Reset
               </button>
               <button
                 onClick={handleDelete}
