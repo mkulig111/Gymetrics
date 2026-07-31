@@ -128,6 +128,47 @@ model WorkoutSet {
   isPr              Boolean         @default(false)
 }
 
+enum SetCategory {
+  MAIN
+  DROP_OFF
+  OTHER
+}
+
+model Programme {
+  id          String   @id @default(cuid())
+  name        String
+  notes       String?
+  archived    Boolean  @default(false)
+  currentWeek Int      @default(1)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  weeks ProgrammeWeek[]
+}
+
+model ProgrammeWeek {
+  id          String    @id @default(cuid())
+  programmeId String
+  programme   Programme @relation(fields: [programmeId], references: [id], onDelete: Cascade)
+  weekNumber  Int
+  label       String?
+
+  schemes ProgrammeSetScheme[]
+
+  @@unique([programmeId, weekNumber])
+}
+
+model ProgrammeSetScheme {
+  id       String        @id @default(cuid())
+  weekId   String
+  week     ProgrammeWeek @relation(fields: [weekId], references: [id], onDelete: Cascade)
+  category SetCategory
+  sets     Int           @default(3)
+  reps     Int           @default(5)
+
+  @@unique([weekId, category])
+}
+
 model BodyweightEntry {
   id       String   @id @default(cuid())
   date     DateTime @default(now())
