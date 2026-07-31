@@ -16,7 +16,7 @@ export default async function ExercisesPage() {
         </div>
         <Link
           href="/exercises/body-parts"
-          className="flex h-[42px] shrink-0 items-center justify-center rounded-xl bg-surface-2 px-3 text-sm text-muted hover:text-foreground"
+          className="flex flex-1 items-center justify-center rounded-full bg-surface-2 px-4 py-2.5 text-sm text-foreground hover:bg-border"
         >
           + Body parts
         </Link>
