@@ -3,13 +3,17 @@ import { Dumbbell, Clock, Pencil, Trash2 } from "lucide-react";
 import { getHistory } from "@/lib/actions/history";
 import { formatDuration } from "@/lib/types";
 import DeleteWorkoutButton from "@/components/history/DeleteWorkoutButton";
+import ExportButton from "@/components/history/ExportButton";
 
 export default async function HistoryPage() {
   const sessions = await getHistory();
 
   return (
     <div className="space-y-4">
-      <h1 className="text-sm font-semibold uppercase tracking-wide text-muted">Workout History</h1>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h1 className="text-sm font-semibold uppercase tracking-wide text-muted">Workout History</h1>
+        <ExportButton />
+      </div>
       {sessions.length === 0 ? (
         <p className="rounded-xl bg-surface p-6 text-center text-sm text-muted">
           No completed workouts yet. Finish a workout to see it here.
