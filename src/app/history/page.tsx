@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Dumbbell, Clock, Pencil, Trash2 } from "lucide-react";
+import { IconDumbbell, IconClock, IconPencil, IconTrash } from "@tabler/icons-react";
 import { getHistory } from "@/lib/actions/history";
 import { formatDuration } from "@/lib/types";
 import DeleteWorkoutButton from "@/components/history/DeleteWorkoutButton";
@@ -39,18 +39,18 @@ export default async function HistoryPage() {
                   </span>
                 </div>
                 <p className="flex items-center gap-1 text-sm text-muted">
-                  <Dumbbell className="h-3.5 w-3.5 shrink-0" />
+                  <IconDumbbell className="h-3.5 w-3.5 shrink-0" stroke={1.5} />
                   {s.exercises.length} exercises &middot; {completedSets} sets &middot;
-                  <Clock className="h-3.5 w-3.5 shrink-0" />
+                  <IconClock className="h-3.5 w-3.5 shrink-0" stroke={1.5} />
                   {formatDuration(duration)}
                 </p>
               </Link>
               <div className="mt-2 flex justify-end gap-4 text-xs">
                 <Link href={`/history/${s.id}/edit`} className="flex items-center gap-1 text-muted hover:text-accent">
-                  <Pencil className="h-3.5 w-3.5" /> Edit
+                  <IconPencil className="h-3.5 w-3.5" stroke={1.5} /> Edit
                 </Link>
                 <DeleteWorkoutButton sessionId={s.id} className="flex items-center gap-1 text-muted hover:text-danger">
-                  <Trash2 className="h-3.5 w-3.5" /> Delete
+                  <IconTrash className="h-3.5 w-3.5" stroke={1.5} /> Delete
                 </DeleteWorkoutButton>
               </div>
             </div>

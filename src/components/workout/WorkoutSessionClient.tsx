@@ -9,7 +9,7 @@ import { RestTimerBar, RestTimerPickerModal } from "@/components/workout/RestTim
 import MuscleVolumeModal from "@/components/workout/MuscleVolumeModal";
 import PlateCalcModal from "@/components/workout/PlateCalcModal";
 import SetTypeModal, { SET_TYPE_META } from "@/components/workout/SetTypeModal";
-import { Timer, Calculator, Activity, Trophy } from "lucide-react";
+import { IconHourglass, IconCalculator, IconActivity, IconTrophy } from "@tabler/icons-react";
 import {
   addExerciseToWorkout,
   addSetToWorkoutExercise,
@@ -223,15 +223,15 @@ export default function WorkoutSessionClient({
       <div className="mb-4 flex items-center justify-between">
         <div className="flex gap-4">
           <button onClick={() => setShowRestPicker(true)} className="flex flex-col items-center gap-1 text-muted">
-            <Timer className="h-5 w-5" />
+            <IconHourglass className="h-5 w-5" stroke={1.5} />
             <span className="text-xs">Rest</span>
           </button>
           <button onClick={() => setShowCalc(true)} className="flex flex-col items-center gap-1 text-muted">
-            <Calculator className="h-5 w-5" />
+            <IconCalculator className="h-5 w-5" stroke={1.5} />
             <span className="text-xs">Calc</span>
           </button>
           <button onClick={() => setShowVolume(true)} className="flex flex-col items-center gap-1 text-muted">
-            <Activity className="h-5 w-5" />
+            <IconActivity className="h-5 w-5" stroke={1.5} />
             <span className="text-xs">Vol</span>
           </button>
         </div>
@@ -330,7 +330,7 @@ export default function WorkoutSessionClient({
                         set.completed ? "bg-accent text-black" : "bg-surface-2 text-muted"
                       }`}
                     >
-                      {set.isPr ? <Trophy className="h-4 w-4" /> : "✓"}
+                      {set.isPr ? <IconTrophy className="h-4 w-4" stroke={1.5} /> : "✓"}
                     </button>
                   </div>
                 </div>

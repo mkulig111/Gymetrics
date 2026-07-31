@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Button from "@/components/ui/Button";
-import { Archive, ArchiveRestore, Dumbbell, Pencil, Play, Trash2 } from "lucide-react";
+import { IconArchive, IconArchiveOff, IconDumbbell, IconPencil, IconPlayerPlay, IconTrash } from "@tabler/icons-react";
 import { archiveRoutine, deleteRoutine, unarchiveRoutine } from "@/lib/actions/routines";
 import { startWorkoutFromRoutine } from "@/lib/actions/workouts";
 
@@ -65,28 +65,28 @@ export default function RoutineCard({
                   onClick={handleUnarchive}
                   className="flex w-full items-center gap-2 px-4 py-3 text-sm hover:bg-border"
                 >
-                  <ArchiveRestore className="h-4 w-4" /> Unarchive
+                  <IconArchiveOff className="h-4 w-4" stroke={1.5} /> Unarchive
                 </button>
               ) : (
                 <button
                   onClick={handleArchive}
                   className="flex w-full items-center gap-2 px-4 py-3 text-sm hover:bg-border"
                 >
-                  <Archive className="h-4 w-4" /> Archive
+                  <IconArchive className="h-4 w-4" stroke={1.5} /> Archive
                 </button>
               )}
               <button
                 onClick={handleDelete}
                 className="flex w-full items-center gap-2 border-t border-border px-4 py-3 text-sm text-danger hover:bg-border"
               >
-                <Trash2 className="h-4 w-4" /> Delete
+                <IconTrash className="h-4 w-4" stroke={1.5} /> Delete
               </button>
             </div>
           )}
         </div>
       </div>
       <p className="mb-3 flex items-center gap-1 text-sm text-muted">
-        <Dumbbell className="h-3.5 w-3.5 shrink-0" />
+        <IconDumbbell className="h-3.5 w-3.5 shrink-0" stroke={1.5} />
         {routine.exercises.length} exercises &middot; {totalSets} sets
       </p>
       <ul className="mb-3 space-y-1 text-sm text-muted">
@@ -101,11 +101,11 @@ export default function RoutineCard({
             href={`/train/routines/${routine.id}/edit`}
             className="flex flex-1 items-center justify-center gap-1.5 rounded-full bg-surface-2 px-4 py-2.5 text-sm hover:bg-border"
           >
-            <Pencil className="h-3.5 w-3.5" /> Edit
+            <IconPencil className="h-3.5 w-3.5" stroke={1.5} /> Edit
           </Link>
           <form action={startWorkoutFromRoutine.bind(null, routine.id)} className="flex-1">
             <Button variant="primary" type="submit" className="flex w-full items-center justify-center gap-1.5">
-              <Play className="h-3.5 w-3.5" /> Start
+              <IconPlayerPlay className="h-3.5 w-3.5" stroke={1.5} /> Start
             </Button>
           </form>
         </div>

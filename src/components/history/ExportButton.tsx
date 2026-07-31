@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Download } from "lucide-react";
+import { IconDownload } from "@tabler/icons-react";
 import { getExportData } from "@/lib/actions/history";
 
 function toDateInput(d: Date) {
@@ -87,7 +87,7 @@ export default function ExportButton() {
         disabled={loading}
         className="flex items-center gap-1.5 rounded-full bg-surface-2 px-3 py-1.5 text-xs font-semibold hover:bg-border disabled:opacity-50"
       >
-        <Download className="h-3.5 w-3.5" />
+        <IconDownload className="h-3.5 w-3.5" stroke={1.5} />
         {loading ? "Exporting…" : "CSV"}
       </button>
     </div>

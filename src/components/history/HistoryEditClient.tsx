@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
-import { Trophy } from "lucide-react";
+import { IconTrophy } from "@tabler/icons-react";
 import { ExerciseType } from "@/generated/prisma";
 import Button from "@/components/ui/Button";
 import ExercisePicker, { ExerciseOption } from "@/components/ExercisePicker";
@@ -238,7 +238,7 @@ export default function HistoryEditClient({
                     set.completed ? "bg-accent text-black" : "bg-surface-2 text-muted"
                   }`}
                 >
-                  {set.isPr ? <Trophy className="h-4 w-4" /> : "✓"}
+                  {set.isPr ? <IconTrophy className="h-4 w-4" stroke={1.5} /> : "✓"}
                 </button>
               </div>
             ))}

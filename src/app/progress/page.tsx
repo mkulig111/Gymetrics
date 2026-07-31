@@ -1,4 +1,4 @@
-import { Dumbbell, Clock, Scale, Trophy } from "lucide-react";
+import { IconDumbbell, IconClock, IconScale, IconTrophy } from "@tabler/icons-react";
 import {
   getBodyweightEntries,
   getGripStrengthEntries,
@@ -40,19 +40,19 @@ export default async function ProgressPage() {
           <h2 className="mb-3 text-lg font-bold">Lifetime Stats</h2>
           <div className="grid grid-cols-2 gap-4 text-center">
             <div>
-              <Dumbbell className="mx-auto mb-1 h-5 w-5 text-accent" />
+              <IconDumbbell className="mx-auto mb-1 h-5 w-5 text-accent" stroke={1.5} />
               <p className="text-2xl font-extrabold text-accent">{stats.totalWorkouts}</p>
               <p className="text-xs text-muted">Workouts</p>
             </div>
             <div>
-              <Clock className="mx-auto mb-1 h-5 w-5 text-accent" />
+              <IconClock className="mx-auto mb-1 h-5 w-5 text-accent" stroke={1.5} />
               <p className="text-2xl font-extrabold text-accent">
                 {stats.totalHours >= 1000 ? `${Math.round(stats.totalHours / 1000)}k` : Math.round(stats.totalHours)}
               </p>
               <p className="text-xs text-muted">Hours</p>
             </div>
             <div>
-              <Scale className="mx-auto mb-1 h-5 w-5 text-accent" />
+              <IconScale className="mx-auto mb-1 h-5 w-5 text-accent" stroke={1.5} />
               <p className="text-2xl font-extrabold text-accent">
                 {stats.totalVolumeKg >= 1000
                   ? `${Math.round(stats.totalVolumeKg / 1000)}k`
@@ -61,7 +61,7 @@ export default async function ProgressPage() {
               <p className="text-xs text-muted">kg Lifted</p>
             </div>
             <div>
-              <Trophy className="mx-auto mb-1 h-5 w-5 text-accent" />
+              <IconTrophy className="mx-auto mb-1 h-5 w-5 text-accent" stroke={1.5} />
               <p className="text-2xl font-extrabold text-accent">{stats.totalPRs}</p>
               <p className="text-xs text-muted">PRs</p>
             </div>
