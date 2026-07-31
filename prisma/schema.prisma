@@ -134,16 +134,56 @@ enum SetCategory {
   OTHER
 }
 
-model Programme {
-  id          String   @id @default(cuid())
-  name        String
-  notes       String?
-  archived    Boolean  @default(false)
-  currentWeek Int      @default(1)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+enum ProgrammeTemplate {
+  CUSTOM
+  BBB
+  TRIUMVIRATE
+  FSL
+}
 
-  weeks ProgrammeWeek[]
+enum MainLift {
+  SQUAT
+  BENCH
+  DEADLIFT
+  PRESS
+}
+
+enum ProgressionCondition {
+  AUTO
+  AMRAP_THRESHOLD
+}
+
+model Programme {
+  id                   String               @id @default(cuid())
+  name                 String
+  notes                String?
+  archived             Boolean              @default(false)
+  currentWeek          Int                  @default(1)
+  currentCycle         Int                  @default(1)
+  templateType         ProgrammeTemplate    @default(CUSTOM)
+
+  // Training 1RMs (kg) — used for structured templates
+  tmSquat              Float?
+  tmBench              Float?
+  tmDeadlift           Float?
+  tmPress              Float?
+  tmPercentage         Float                @default(90)
+  roundingIncrement    Float                @default(2.5)
+  cycleLengthWeeks     Int                  @default(4)
+  hasDeloadWeek        Boolean              @default(false)
+
+  // Per-cycle progression
+  progressionUpper     Float                @default(2.5)
+  progressionLower     Float                @default(5.0)
+  progressionCondition ProgressionCondition @default(AUTO)
+  amrapThreshold       Int                  @default(5)
+
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+
+  weeks       ProgrammeWeek[]
+  days        ProgrammeDay[]
+  weekSchemes ProgrammeWeekScheme[]
 }
 
 model ProgrammeWeek {
@@ -167,6 +207,37 @@ model ProgrammeSetScheme {
   reps     Int           @default(5)
 
   @@unique([weekId, category])
+}
+
+model ProgrammeDay {
+  id                 String      @id @default(cuid())
+  programmeId        String
+  programme          Programme   @relation(fields: [programmeId], references: [id], onDelete: Cascade)
+  dayOfWeek          Int
+  mainLift           MainLift
+  assistanceCategory SetCategory
+
+  @@unique([programmeId, dayOfWeek])
+}
+
+model ProgrammeWeekScheme {
+  id          String                  @id @default(cuid())
+  programmeId String
+  programme   Programme               @relation(fields: [programmeId], references: [id], onDelete: Cascade)
+  weekNum     Int
+  entries     ProgrammeSetSchemeEntry[]
+
+  @@unique([programmeId, weekNum])
+}
+
+model ProgrammeSetSchemeEntry {
+  id           String              @id @default(cuid())
+  weekSchemeId String
+  weekScheme   ProgrammeWeekScheme @relation(fields: [weekSchemeId], references: [id], onDelete: Cascade)
+  percent      Float
+  reps         Int
+  isAmrap      Boolean             @default(false)
+  setOrder     Int
 }
 
 model BodyweightEntry {
