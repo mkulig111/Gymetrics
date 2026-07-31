@@ -68,6 +68,24 @@ export function RestTimerBar({
   const remainingMs = now == null ? endAt - 1 : endAt - now;
   useEffect(() => {
     if (now != null && remainingMs <= 0) {
+      try {
+        const ctx = new AudioContext();
+        const beep = (startTime: number, freq: number, duration: number) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.frequency.value = freq;
+          osc.type = "sine";
+          gain.gain.setValueAtTime(0.4, startTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+          osc.start(startTime);
+          osc.stop(startTime + duration);
+        };
+        beep(ctx.currentTime, 880, 0.15);
+        beep(ctx.currentTime + 0.2, 880, 0.3);
+      } catch {}
+      try { navigator.vibrate([200, 100, 200]); } catch {}
       const t = setTimeout(onClear, 0);
       return () => clearTimeout(t);
     }
