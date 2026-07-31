@@ -22,7 +22,7 @@
   --color-accent: var(--accent);
   --color-danger: var(--danger);
   --color-danger-bg: var(--danger-bg);
-  --font-sans: var(--font-poppins);
+  --font-sans: var(--font-mulish);
 }
 
 body {
