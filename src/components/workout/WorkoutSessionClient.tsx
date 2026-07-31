@@ -9,7 +9,7 @@ import { RestTimerBar, RestTimerPickerModal } from "@/components/workout/RestTim
 import MuscleVolumeModal from "@/components/workout/MuscleVolumeModal";
 import PlateCalcModal from "@/components/workout/PlateCalcModal";
 import SetTypeModal, { SET_TYPE_META } from "@/components/workout/SetTypeModal";
-import { IconHourglass, IconCalculator, IconActivity, IconTrophy } from "@tabler/icons-react";
+import { IconHourglass, IconCalculator, IconActivity, IconTrophy, IconPlus, IconMinus, IconTrash, IconArrowsExchange } from "@tabler/icons-react";
 import {
   addExerciseToWorkout,
   addSetToWorkoutExercise,
@@ -254,17 +254,18 @@ export default function WorkoutSessionClient({
               <span className="font-bold text-accent">
                 {weIndex + 1} {we.exercise.name}
               </span>
-              <button onClick={() => setSwapTarget(we.id)} className="text-xs text-muted underline">
-                Swap
+              <button onClick={() => setSwapTarget(we.id)} aria-label="Swap exercise" className="text-muted hover:text-foreground">
+                <IconArrowsExchange className="h-4 w-4" stroke={1.5} />
               </button>
             </div>
 
-            <div className="grid grid-cols-[auto_1fr_1fr_1fr_auto] items-center gap-2 text-xs text-muted">
+            <div className="grid grid-cols-[auto_1fr_1fr_1fr_auto_auto] items-center gap-2 text-xs text-muted">
               <span>Set</span>
               <span>Previous</span>
               <span>Target</span>
               <span>{we.exercise.type === ExerciseType.TIME ? "Seconds" : we.exercise.type === ExerciseType.BODYWEIGHT_REPS ? "Reps" : "kg x Reps"}</span>
               <span>✓</span>
+              <span></span>
             </div>
 
             {we.sets.map((set) => {
@@ -272,7 +273,7 @@ export default function WorkoutSessionClient({
               return (
                 <div
                   key={set.id}
-                  className="grid grid-cols-[auto_1fr_1fr_1fr_auto] items-center gap-2 border-t border-border py-2"
+                  className="grid grid-cols-[auto_1fr_1fr_1fr_auto_auto] items-center gap-2 border-t border-border py-2"
                 >
                   <button
                     onClick={() => setSetTypeTarget({ weId: we.id, set })}
@@ -322,35 +323,32 @@ export default function WorkoutSessionClient({
                       />
                     </div>
                   )}
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => onToggleComplete(we.id, set)}
-                      aria-label={set.completed ? "Mark set incomplete" : "Mark set complete"}
-                      className={`flex h-7 w-7 items-center justify-center rounded-full ${
-                        set.completed ? "bg-accent text-black" : "bg-surface-2 text-muted"
-                      }`}
-                    >
-                      {set.isPr ? <IconTrophy className="h-4 w-4" stroke={1.5} /> : "✓"}
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => onToggleComplete(we.id, set)}
+                    aria-label={set.completed ? "Mark set incomplete" : "Mark set complete"}
+                    className={`flex h-7 w-7 items-center justify-center rounded-full ${
+                      set.completed ? "bg-accent text-black" : "bg-surface-2 text-muted"
+                    }`}
+                  >
+                    {set.isPr ? <IconTrophy className="h-4 w-4" stroke={1.5} /> : "✓"}
+                  </button>
+                  <button
+                    onClick={() => onRemoveSet(we, set.id)}
+                    aria-label="Remove set"
+                    className="flex h-7 w-7 items-center justify-center text-muted hover:text-danger"
+                  >
+                    <IconMinus className="h-4 w-4" stroke={1.5} />
+                  </button>
                 </div>
               );
             })}
 
             <div className="mt-3 flex items-center justify-between">
-              <button onClick={() => onAddSet(we)} className="text-sm font-semibold text-foreground hover:text-accent">
-                + Add Set
+              <button onClick={() => onAddSet(we)} className="flex items-center gap-1 text-sm font-semibold text-foreground hover:text-accent">
+                <IconPlus className="h-4 w-4" stroke={1.5} /> Set
               </button>
-              {we.sets.length > 0 && (
-                <button
-                  onClick={() => onRemoveSet(we, we.sets[we.sets.length - 1].id)}
-                  className="text-sm text-muted hover:text-danger"
-                >
-                  Remove Set
-                </button>
-              )}
-              <button onClick={() => onRemoveExercise(we.id)} className="text-sm text-danger">
-                Remove
+              <button onClick={() => onRemoveExercise(we.id)} aria-label="Remove exercise" className="text-danger hover:opacity-70">
+                <IconTrash className="h-4 w-4" stroke={1.5} />
               </button>
             </div>
           </div>
