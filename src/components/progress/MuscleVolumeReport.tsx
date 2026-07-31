@@ -11,13 +11,86 @@ const INTERVALS: { value: MuscleVolumeInterval; label: string }[] = [
   { value: "monthly", label: "Monthly" },
 ];
 
+// Roll detailed muscle names up into 7 main body-part groups
+const MUSCLE_TO_GROUP: Record<string, string> = {
+  Chest: "Chest",
+  Back: "Back",
+  Traps: "Back",
+  Shoulders: "Shoulders",
+  Biceps: "Arms",
+  Triceps: "Arms",
+  Forearms: "Arms",
+  Quadriceps: "Legs",
+  Hamstrings: "Legs",
+  Calves: "Legs",
+  Glutes: "Glutes",
+  Core: "Core",
+  "Lower Back": "Core",
+  Hips: "Core",
+};
+
+const GROUP_ORDER = ["Chest", "Back", "Shoulders", "Arms", "Legs", "Glutes", "Core"] as const;
+
+const GROUP_COLORS: Record<string, string> = {
+  Chest: "#3b82f6",
+  Back: "#22c55e",
+  Shoulders: "#a855f7",
+  Arms: "#f97316",
+  Legs: "#06b6d4",
+  Glutes: "#ec4899",
+  Core: "#eab308",
+};
+
+function aggregateGroups(muscleVolume: { muscle: string; volume: number }[]) {
+  const map = new Map<string, number>();
+  for (const { muscle, volume } of muscleVolume) {
+    const group = MUSCLE_TO_GROUP[muscle];
+    if (!group) continue;
+    map.set(group, (map.get(group) ?? 0) + volume);
+  }
+  return GROUP_ORDER.filter((g) => map.has(g)).map((g) => ({ group: g, volume: map.get(g)! }));
+}
+
+function polarXY(cx: number, cy: number, r: number, deg: number) {
+  const rad = ((deg - 90) * Math.PI) / 180;
+  return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
+}
+
+function arcPath(cx: number, cy: number, r: number, startDeg: number, endDeg: number) {
+  if (endDeg - startDeg >= 359.99) {
+    return `M ${cx} ${cy - r} A ${r} ${r} 0 1 1 ${cx - 0.001} ${cy - r} Z`;
+  }
+  const s = polarXY(cx, cy, r, startDeg);
+  const e = polarXY(cx, cy, r, endDeg);
+  const large = endDeg - startDeg > 180 ? 1 : 0;
+  return `M ${cx} ${cy} L ${s.x} ${s.y} A ${r} ${r} 0 ${large} 1 ${e.x} ${e.y} Z`;
+}
+
+function PieChart({ groups }: { groups: { group: string; volume: number }[] }) {
+  const total = groups.reduce((s, g) => s + g.volume, 0);
+  const cx = 100;
+  const cy = 100;
+  const r = 88;
+  let angle = 0;
+
+  return (
+    <svg viewBox="0 0 200 200" className="mx-auto w-44">
+      {groups.map(({ group, volume }) => {
+        const sweep = (volume / total) * 360;
+        const d = arcPath(cx, cy, r, angle, angle + sweep);
+        angle += sweep;
+        return <path key={group} d={d} fill={GROUP_COLORS[group] ?? "#888"} />;
+      })}
+    </svg>
+  );
+}
+
 function formatDate(d: Date) {
   return new Date(d).toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
-
 function formatRange(report: Report) {
   if (report.interval === "daily") return formatDate(report.rangeEnd);
-  return `${formatDate(report.rangeStart)} - ${formatDate(report.rangeEnd)}`;
+  return `${formatDate(report.rangeStart)} – ${formatDate(report.rangeEnd)}`;
 }
 
 export default function MuscleVolumeReport({ initialReport }: { initialReport: Report }) {
@@ -33,12 +106,13 @@ export default function MuscleVolumeReport({ initialReport }: { initialReport: R
     });
   }
 
-  const max = Math.max(1, ...report.muscleVolume.map((m) => m.volume));
+  const groups = aggregateGroups(report.muscleVolume);
+  const total = groups.reduce((s, g) => s + g.volume, 0);
 
   return (
     <div className="rounded-xl bg-surface p-4">
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-lg font-bold">Muscle Volume Report</h2>
+        <h2 className="text-lg font-bold">Muscle Volume</h2>
         <div className="flex rounded-lg bg-surface-2 p-1">
           {INTERVALS.map((opt) => (
             <button
@@ -76,27 +150,33 @@ export default function MuscleVolumeReport({ initialReport }: { initialReport: R
           </div>
         </div>
 
-        {report.muscleVolume.length === 0 ? (
+        {groups.length === 0 ? (
           <p className="py-4 text-center text-sm text-muted">
             No completed sets in this period yet.
           </p>
         ) : (
-          <div className="space-y-3">
-            {report.muscleVolume.map((m) => (
-              <div key={m.muscle}>
-                <div className="mb-1 flex justify-between text-sm">
-                  <span>{m.muscle}</span>
-                  <span className="font-semibold">{Math.round(m.volume)}</span>
+          <>
+            <PieChart groups={groups} />
+            <div className="mt-4 space-y-2">
+              {groups.map(({ group, volume }) => (
+                <div key={group} className="flex items-center justify-between text-sm">
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="h-3 w-3 flex-shrink-0 rounded-full"
+                      style={{ backgroundColor: GROUP_COLORS[group] }}
+                    />
+                    <span>{group}</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="font-semibold">{Math.round(volume)}</span>
+                    <span className="w-9 text-right text-muted">
+                      {Math.round((volume / total) * 100)}%
+                    </span>
+                  </div>
                 </div>
-                <div className="h-2 w-full rounded-full bg-surface-2">
-                  <div
-                    className="h-2 rounded-full bg-accent"
-                    style={{ width: `${(m.volume / max) * 100}%` }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
     </div>
