@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
+import { Trophy } from "lucide-react";
 import { ExerciseType } from "@/generated/prisma";
 import Button from "@/components/ui/Button";
 import ExercisePicker, { ExerciseOption } from "@/components/ExercisePicker";
@@ -237,7 +238,7 @@ export default function HistoryEditClient({
                     set.completed ? "bg-accent text-black" : "bg-surface-2 text-muted"
                   }`}
                 >
-                  {set.isPr ? "🏆" : "✓"}
+                  {set.isPr ? <Trophy className="h-4 w-4" /> : "✓"}
                 </button>
               </div>
             ))}

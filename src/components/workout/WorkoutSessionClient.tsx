@@ -9,6 +9,7 @@ import { RestTimerBar, RestTimerPickerModal } from "@/components/workout/RestTim
 import MuscleVolumeModal from "@/components/workout/MuscleVolumeModal";
 import PlateCalcModal from "@/components/workout/PlateCalcModal";
 import SetTypeModal, { SET_TYPE_META } from "@/components/workout/SetTypeModal";
+import { Timer, Calculator, Activity, Trophy } from "lucide-react";
 import {
   addExerciseToWorkout,
   addSetToWorkoutExercise,
@@ -222,15 +223,15 @@ export default function WorkoutSessionClient({
       <div className="mb-4 flex items-center justify-between">
         <div className="flex gap-4">
           <button onClick={() => setShowRestPicker(true)} className="flex flex-col items-center gap-1 text-muted">
-            <span className="text-xl">⏱</span>
+            <Timer className="h-5 w-5" />
             <span className="text-xs">Rest</span>
           </button>
           <button onClick={() => setShowCalc(true)} className="flex flex-col items-center gap-1 text-muted">
-            <span className="text-xl">🧮</span>
+            <Calculator className="h-5 w-5" />
             <span className="text-xs">Calc</span>
           </button>
           <button onClick={() => setShowVolume(true)} className="flex flex-col items-center gap-1 text-muted">
-            <span className="text-xl">💪</span>
+            <Activity className="h-5 w-5" />
             <span className="text-xs">Vol</span>
           </button>
         </div>
@@ -329,7 +330,7 @@ export default function WorkoutSessionClient({
                         set.completed ? "bg-accent text-black" : "bg-surface-2 text-muted"
                       }`}
                     >
-                      {set.isPr ? "🏆" : "✓"}
+                      {set.isPr ? <Trophy className="h-4 w-4" /> : "✓"}
                     </button>
                   </div>
                 </div>

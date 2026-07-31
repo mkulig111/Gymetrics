@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Trophy } from "lucide-react";
 import { getSessionDetail } from "@/lib/actions/history";
 import { muscleVolume } from "@/lib/muscleVolume";
 import { ExerciseType } from "@/generated/prisma";
@@ -84,7 +85,7 @@ export default async function SessionDetailPage({
                           ? `${s.reps ?? 0} reps`
                           : `${s.weightKg ?? 0}kg x ${s.reps ?? 0}`}
                     </span>
-                    {s.isPr && <span className="text-accent">🏆 PR</span>}
+                    {s.isPr && <span className="flex items-center gap-1 text-accent"><Trophy className="h-3.5 w-3.5" /> PR</span>}
                   </div>
                 ))}
               {we.sets.filter((s) => s.completed).length === 0 && (

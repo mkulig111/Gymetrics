@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Button from "@/components/ui/Button";
+import { Archive, ArchiveRestore, Dumbbell, Pencil, Play, Trash2 } from "lucide-react";
 import { archiveRoutine, deleteRoutine, unarchiveRoutine } from "@/lib/actions/routines";
 import { startWorkoutFromRoutine } from "@/lib/actions/workouts";
 
@@ -64,28 +65,29 @@ export default function RoutineCard({
                   onClick={handleUnarchive}
                   className="flex w-full items-center gap-2 px-4 py-3 text-sm hover:bg-border"
                 >
-                  <span>📤</span> Unarchive
+                  <ArchiveRestore className="h-4 w-4" /> Unarchive
                 </button>
               ) : (
                 <button
                   onClick={handleArchive}
                   className="flex w-full items-center gap-2 px-4 py-3 text-sm hover:bg-border"
                 >
-                  <span>📦</span> Archive
+                  <Archive className="h-4 w-4" /> Archive
                 </button>
               )}
               <button
                 onClick={handleDelete}
                 className="flex w-full items-center gap-2 border-t border-border px-4 py-3 text-sm text-danger hover:bg-border"
               >
-                <span>🗑️</span> Delete
+                <Trash2 className="h-4 w-4" /> Delete
               </button>
             </div>
           )}
         </div>
       </div>
-      <p className="mb-3 text-sm text-muted">
-        🏋️ {routine.exercises.length} exercises &middot; {totalSets} sets
+      <p className="mb-3 flex items-center gap-1 text-sm text-muted">
+        <Dumbbell className="h-3.5 w-3.5 shrink-0" />
+        {routine.exercises.length} exercises &middot; {totalSets} sets
       </p>
       <ul className="mb-3 space-y-1 text-sm text-muted">
         {routine.exercises.slice(0, 4).map((e) => (
@@ -97,13 +99,13 @@ export default function RoutineCard({
         <div className="flex gap-2">
           <Link
             href={`/train/routines/${routine.id}/edit`}
-            className="flex-1 rounded-full bg-surface-2 px-4 py-2.5 text-center text-sm hover:bg-border"
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-full bg-surface-2 px-4 py-2.5 text-sm hover:bg-border"
           >
-            ✏️ Edit
+            <Pencil className="h-3.5 w-3.5" /> Edit
           </Link>
           <form action={startWorkoutFromRoutine.bind(null, routine.id)} className="flex-1">
-            <Button variant="primary" type="submit" className="w-full">
-              ▶ Start
+            <Button variant="primary" type="submit" className="flex w-full items-center justify-center gap-1.5">
+              <Play className="h-3.5 w-3.5" /> Start
             </Button>
           </form>
         </div>
