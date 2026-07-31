@@ -52,11 +52,6 @@ export default function RoutineCard({
   const totalSets = routine.exercises.reduce((sum, e) => sum + e.sets.length, 0);
   const progress = Math.min(routine.workoutsSinceDeload / routine.deloadInterval, 1);
   const isDeloadDue = routine.workoutsSinceDeload >= routine.deloadInterval;
-  const barColor = isDeloadDue
-    ? "#ef4444"
-    : progress >= 0.75
-      ? "#f97316"
-      : "#22c55e";
 
   return (
     <div className="rounded-xl bg-surface p-4">
@@ -124,10 +119,10 @@ export default function RoutineCard({
             {isDeloadDue ? "Czas na deload!" : `${routine.workoutsSinceDeload} / ${routine.deloadInterval}`}
           </span>
         </div>
-        <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-2">
+        <div className="h-3 w-full overflow-hidden rounded-full bg-surface-2">
           <div
             className="h-full rounded-full transition-all"
-            style={{ width: `${progress * 100}%`, backgroundColor: barColor }}
+            style={{ width: `${progress * 100}%`, background: "linear-gradient(to right, #22c55e, #f97316, #ef4444)" }}
           />
         </div>
       </div>
