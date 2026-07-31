@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { IconAdjustmentsHorizontal } from "@tabler/icons-react";
 import { getExercises } from "@/lib/actions/exercises";
 import NewExerciseButton from "@/components/exercises/NewExerciseButton";
 import ExercisesClient from "@/components/exercises/ExercisesClient";
@@ -17,10 +16,9 @@ export default async function ExercisesPage() {
         </div>
         <Link
           href="/exercises/body-parts"
-          aria-label="Manage body parts"
-          className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-xl bg-surface-2 text-muted hover:text-foreground"
+          className="flex h-[42px] shrink-0 items-center justify-center rounded-xl bg-surface-2 px-3 text-sm text-muted hover:text-foreground"
         >
-          <IconAdjustmentsHorizontal className="h-5 w-5" stroke={1.5} />
+          + Body parts
         </Link>
       </div>
 
