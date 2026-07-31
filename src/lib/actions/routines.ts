@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 
 export async function getRoutines() {
   return prisma.routine.findMany({
+    where: { archived: false },
     orderBy: { order: "asc" },
     include: {
       exercises: {
@@ -13,6 +14,29 @@ export async function getRoutines() {
       },
     },
   });
+}
+
+export async function getArchivedRoutines() {
+  return prisma.routine.findMany({
+    where: { archived: true },
+    orderBy: { order: "asc" },
+    include: {
+      exercises: {
+        orderBy: { order: "asc" },
+        include: { exercise: { include: { bodyParts: { include: { bodyPart: true } } } }, sets: true },
+      },
+    },
+  });
+}
+
+export async function archiveRoutine(routineId: string) {
+  await prisma.routine.update({ where: { id: routineId }, data: { archived: true } });
+  revalidatePath("/train");
+}
+
+export async function unarchiveRoutine(routineId: string) {
+  await prisma.routine.update({ where: { id: routineId }, data: { archived: false } });
+  revalidatePath("/train");
 }
 
 export async function getRoutine(id: string) {

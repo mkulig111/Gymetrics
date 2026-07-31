@@ -1,11 +1,11 @@
-import { getRoutines } from "@/lib/actions/routines";
+import { getArchivedRoutines, getRoutines } from "@/lib/actions/routines";
 import { startEmptyWorkout } from "@/lib/actions/workouts";
 import RoutineCard from "@/components/train/RoutineCard";
 import NewRoutineButton from "@/components/train/NewRoutineButton";
 import Button from "@/components/ui/Button";
 
 export default async function TrainPage() {
-  const routines = await getRoutines();
+  const [routines, archivedRoutines] = await Promise.all([getRoutines(), getArchivedRoutines()]);
 
   return (
     <div className="space-y-6">
@@ -33,6 +33,21 @@ export default async function TrainPage() {
           </div>
         )}
       </div>
+
+      {archivedRoutines.length > 0 && (
+        <details className="group">
+          <summary className="cursor-pointer list-none">
+            <h2 className="inline text-sm font-semibold uppercase tracking-wide text-muted">
+              Archived ({archivedRoutines.length})
+            </h2>
+          </summary>
+          <div className="mt-3 space-y-4">
+            {archivedRoutines.map((r) => (
+              <RoutineCard key={r.id} routine={r} archived />
+            ))}
+          </div>
+        </details>
+      )}
     </div>
   );
 }
